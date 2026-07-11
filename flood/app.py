@@ -9,8 +9,10 @@ import osmnx as ox
 import pandas as pd
 import numpy as np
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 ox.settings.use_cache = True
 ox.settings.log_console = False
