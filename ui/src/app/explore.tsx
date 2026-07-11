@@ -66,6 +66,9 @@ export default function ExploreScreen() {
         .dash-anim { animation: dash 20s linear infinite; }
         @keyframes dash { to { stroke-dashoffset: -1000; } }
         
+        .water-flow-anim { animation: waterFlow 3s linear infinite; filter: drop-shadow(0 0 5px #00aaff); }
+        @keyframes waterFlow { to { stroke-dashoffset: -100; } }
+        
         /* Custom popup styling */
         .leaflet-popup-content-wrapper { background: rgba(10, 10, 20, 0.9); color: white; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); }
         .leaflet-popup-tip { background: rgba(10, 10, 20, 0.9); }
@@ -100,76 +103,77 @@ export default function ExploreScreen() {
         const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([18.8, 73.3], 9);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
 
-        // Custom Icons
         const createPin = (color) => L.divIcon({
           html: \`<svg width="32" height="32" viewBox="0 0 24 24" fill="\${color}" stroke="#fff" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5" fill="#fff"/></svg>\`,
           className: '', iconSize: [32, 32], iconAnchor: [16, 32]
         });
 
-        // Start & End
-        L.marker([19.0760, 72.8777], { icon: createPin('#0066ff') }).addTo(map).bindPopup('<b>Rescue Fleet HQ (Mumbai)</b>');
-        L.marker([18.5204, 73.8567], { icon: createPin('#00ffaa') }).addTo(map).bindPopup('<b>Target Zone (Pune)</b>');
+        // Mumbai and Pune coordinates (Lng, Lat for OSRM API)
+        const start = [72.8777, 19.0760];
+        const end = [73.8567, 18.5204];
+        const detour = [73.18, 18.65]; // Safe waypoint bypassing flood
 
-        // Flood Zone (Red Circle)
-        const floodZone = L.circle([18.75, 73.4], {
-          color: '#ff3333',
-          fillColor: '#ff3333',
-          fillOpacity: 0.4,
-          radius: 20000 // 20km
-        }).addTo(map);
-        
-        floodZone.bindPopup('<b>SEVERE FLASH FLOOD</b><br/>Water depth: 1.5m<br/>Impassable');
+        L.marker([start[1], start[0]], { icon: createPin('#0066ff') }).addTo(map).bindPopup('<b>Rescue Fleet HQ (Mumbai)</b>');
+        L.marker([end[1], end[0]], { icon: createPin('#00ffaa') }).addTo(map).bindPopup('<b>Target Zone (Pune)</b>');
 
-        // Original Route (Straight-ish, passing through flood)
-        const origPath = [
-          [19.076, 72.877],
-          [18.989, 73.117],
-          [18.75, 73.4], // Lonavala (Flooded)
-          [18.65, 73.65],
-          [18.52, 73.85]
-        ];
-        
-        const origLine = L.polyline(origPath, { 
-          color: '#ff3333', 
-          weight: 4, 
-          dashArray: '10, 15',
-          className: 'dash-anim'
-        }).addTo(map);
+        let origLines = [], safeLine, floodMarker;
 
-        let safeLine;
+        // Fetch Original Route from OpenStreetMap (OSRM)
+        fetch(\`https://router.project-osrm.org/route/v1/driving/\${start[0]},\${start[1]};\${end[0]},\${end[1]}?overview=full&geometries=geojson\`)
+          .then(res => res.json())
+          .then(data => {
+            const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+            
+            // Calculate indices for the flooded segment (from 35% to 65% of the route)
+            const len = coords.length;
+            const floodStart = Math.floor(len * 0.35);
+            const floodEnd = Math.floor(len * 0.65);
+            
+            const preFloodCoords = coords.slice(0, floodStart + 1);
+            const floodedCoords = coords.slice(floodStart, floodEnd + 1);
+            const postFloodCoords = coords.slice(floodEnd);
+            
+            // Draw normal impassable sections (muted red)
+            origLines.push(L.polyline(preFloodCoords, { color: '#ff3333', weight: 4, dashArray: '10, 15', className: 'dash-anim' }).addTo(map));
+            origLines.push(L.polyline(postFloodCoords, { color: '#ff3333', weight: 4, dashArray: '10, 15', className: 'dash-anim' }).addTo(map));
+            
+            // Draw flooded section (water flowing over the road)
+            origLines.push(L.polyline(floodedCoords, { color: '#002244', weight: 10 }).addTo(map)); // Deep water base
+            origLines.push(L.polyline(floodedCoords, { color: '#00aaff', weight: 6, dashArray: '15, 15', className: 'water-flow-anim' }).addTo(map)); // Flowing crests
+            
+            // Add a warning marker exactly at the center of the flooded road
+            const centerCoord = coords[Math.floor(len * 0.5)];
+            const warningIcon = L.divIcon({
+              html: \`<svg width="24" height="24" viewBox="0 0 24 24" fill="#ff3333" stroke="#fff" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>\`,
+              className: '', iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12]
+            });
+            floodMarker = L.marker(centerCoord, { icon: warningIcon })
+              .addTo(map)
+              .bindPopup('<b>SEVERE FLASH FLOOD</b><br/>Water depth: 1.5m<br/>Highway Submerged & Impassable')
+              .openPopup();
+          });
 
         window.recalculateRoute = function() {
           const btn = document.getElementById('recalc-btn');
-          btn.innerText = "Computing in-memory...";
+          btn.innerText = "Computing via OSM Engine...";
           btn.style.background = "#aaaaaa";
           
-          // Simulate <1s latency
-          setTimeout(() => {
-            btn.style.display = "none";
-            document.getElementById('safe-route-row').style.display = "flex";
-            document.getElementById('orig-route').style.textDecoration = "line-through";
-            document.getElementById('orig-route').style.opacity = "0.5";
-            
-            // Draw the safe route (Circumventing South)
-            const safePath = [
-              [19.076, 72.877],
-              [18.989, 73.117],
-              [18.73, 73.08], // Pen
-              [18.45, 73.20], // Further south
-              [18.40, 73.50], // East
-              [18.52, 73.85]  // Pune
-            ];
-            
-            safeLine = L.polyline(safePath, {
-              color: '#00ffaa',
-              weight: 5,
-              className: 'dash-anim'
-            }).addTo(map);
-            
-            // Fit bounds to show both
-            map.fitBounds(safeLine.getBounds(), { padding: [50, 50] });
-            
-          }, 600); // 600ms simulation of rapid recalculation
+          // Fetch Safe Route from OpenStreetMap (OSRM) bypassing the flood
+          fetch(\`https://router.project-osrm.org/route/v1/driving/\${start[0]},\${start[1]};\${detour[0]},\${detour[1]};\${end[0]},\${end[1]}?overview=full&geometries=geojson\`)
+            .then(res => res.json())
+            .then(data => {
+              btn.style.display = "none";
+              document.getElementById('safe-route-row').style.display = "flex";
+              document.getElementById('orig-route').style.textDecoration = "line-through";
+              document.getElementById('orig-route').style.opacity = "0.5";
+              
+              const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+              safeLine = L.polyline(coords, {
+                color: '#00ffaa', weight: 5, className: 'dash-anim'
+              }).addTo(map);
+              
+              map.fitBounds(safeLine.getBounds(), { padding: [50, 50] });
+            });
         };
       </script>
     </body>
