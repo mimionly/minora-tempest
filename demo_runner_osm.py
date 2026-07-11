@@ -347,6 +347,139 @@ def apply_dynamic_risk_model(G: nx.DiGraph, flood_polygon: List[Tuple[float, flo
     return blocked_edges, slowed_edges
 
 
+def apply_river_gauge_dem_model(
+    G: nx.DiGraph,
+    current_level: float,
+    normal_level: float,
+    center_lat: float,
+    center_lon: float,
+    water_coords: List[Tuple[float, float]] = None
+) -> Tuple[List[Tuple[float, float]], List, List]:
+    """
+    Computes flood zones and risks using Method 2: River Gauge + DEM.
+    - Current Level: e.g. 8.2 m
+    - Normal Level: e.g. 5.0 m
+    - Extra Water: 3.2 m
+    - Spreads water from waterways to nearby lower elevation roads.
+    """
+    import math
+    from scipy.spatial import KDTree, ConvexHull
+    
+    extra_water = current_level - normal_level
+    flood_threshold_elev = normal_level + extra_water
+    
+    # Scale spread distance by extra water (e.g., 150m per meter of extra water)
+    spread_radius_m = max(100.0, extra_water * 150.0)
+    
+    blocked_edges = []
+    slowed_edges = []
+    flooded_points = []
+    
+    # Range of coordinates for scaling mock elevation model
+    lats = [G.nodes[n]["lat"] for n in G.nodes]
+    lons = [G.nodes[n]["lon"] for n in G.nodes]
+    min_lat, max_lat = min(lats), max(lats)
+    min_lon, max_lon = min(lons), max(lons)
+    lon_span = max(0.001, max_lon - min_lon)
+    
+    # Build KDTree for real water coords if provided
+    water_tree = None
+    if water_coords:
+        water_tree = KDTree(np.array(water_coords))
+        
+    for u, v, d in G.edges(data=True):
+        u_data = G.nodes[u]
+        v_data = G.nodes[v]
+        p1 = (u_data["lat"], u_data["lon"])
+        p2 = (v_data["lat"], v_data["lon"])
+        
+        # 1. Length
+        length_m = d.get("length_m") or d.get("length") or haversine_distance(p1[0], p1[1], p2[0], p2[1])
+        d["length"] = length_m
+        
+        # 2. Speed (mps)
+        travel_time_s = d.get("travel_time_s", 60.0)
+        speed_mps = length_m / max(1.0, travel_time_s)
+        d["speed"] = speed_mps
+        
+        # 3. Rain (fixed for Method 2 simulation)
+        d["rain"] = 0.0
+        
+        # 4. Elevation (simulates coastal river valley rising up to inland hills)
+        mid_lat = (p1[0] + p2[0]) / 2.0
+        mid_lon = (p1[1] + p2[1]) / 2.0
+        elev_u = 2.0 + 40.0 * ((p1[1] - min_lon) / lon_span)
+        elev_v = 2.0 + 40.0 * ((p2[1] - min_lon) / lon_span)
+        elevation = (elev_u + elev_v) / 2.0
+        d["elevation"] = elevation
+        
+        # 5. Slope
+        slope = (elev_v - elev_u) / max(1.0, length_m)
+        d["slope"] = slope
+        
+        # 6. River Distance
+        if water_tree:
+            dist_deg, _ = water_tree.query([mid_lat, mid_lon])
+            river_distance = dist_deg * 111_000.0  # Convert to meters
+        else:
+            d_deg = abs(mid_lat - (center_lat + (mid_lon - center_lon) - 0.002)) / math.sqrt(2.0)
+            river_distance = d_deg * 111_000.0
+        d["river_distance"] = river_distance
+        
+        # 7. Flood probability and blocked state
+        # Flood condition: near river AND elevation <= flood_threshold_elev (e.g. 8.2m)
+        is_flooded = (river_distance <= spread_radius_m) and (elevation <= flood_threshold_elev)
+        
+        if is_flooded:
+            flood_probability = 1.0
+            d["blocked"] = True
+            blocked_edges.append((u, v, d.get("name") or "Unnamed Road"))
+            flooded_points.append(p1)
+            flooded_points.append(p2)
+        else:
+            # Check for partial/slow zone waterlogging in low elevation areas near river
+            is_slowed = (river_distance <= spread_radius_m + 200.0) and (elevation <= flood_threshold_elev + 1.5)
+            if is_slowed:
+                flood_probability = 0.5
+                d["blocked"] = False
+                slowed_edges.append((u, v, d.get("name") or "Unnamed Road"))
+            else:
+                flood_probability = 0.0
+                d["blocked"] = False
+                
+        d["flood_probability"] = flood_probability
+        d["risk"] = flood_probability
+        
+    # Build flood polygon using Convex Hull of flooded points
+    flood_polygon = []
+    if len(flooded_points) >= 3:
+        try:
+            points_arr = np.array(list(set(flooded_points)))
+            if len(points_arr) >= 3:
+                hull = ConvexHull(points_arr)
+                flood_polygon = [tuple(points_arr[idx]) for idx in hull.vertices]
+                flood_polygon.append(flood_polygon[0]) # Close the loop
+        except Exception as e:
+            logger.warning(f"Could not compute Convex Hull for Method 2: {e}")
+            
+    # Fallback to simple bounding box if Convex Hull fails
+    if not flood_polygon and flooded_points:
+        lats = [p[0] for p in flooded_points]
+        lons = [p[1] for p in flooded_points]
+        min_lat, max_lat = min(lats), max(lats)
+        min_lon, max_lon = min(lons), max(lons)
+        flood_polygon = [
+            (min_lat, min_lon),
+            (max_lat, min_lon),
+            (max_lat, max_lon),
+            (min_lat, max_lon),
+            (min_lat, min_lon)
+        ]
+        
+    return flood_polygon, blocked_edges, slowed_edges
+
+
+
 # ============================================================================
 # FLEET DISPATCH & EVACUATION
 # ============================================================================
@@ -407,6 +540,37 @@ def find_nearest_safe_zones(G: nx.DiGraph, facilities: Dict, incident_node: int)
         logger.info(f"     ETA: {eta_min:.1f} min | Route has {len(route)-1} segments.")
 
 
+def extract_waterway_geojson_features(osm_data: Dict) -> List[Dict]:
+    """Extract waterways from OSM data as LineString GeoJSON features"""
+    features = []
+    nodes_dict = osm_data.get("nodes", {})
+    
+    for way_id, way in osm_data.get("ways", {}).items():
+        tags = way.get("tags", {})
+        if "waterway" in tags or tags.get("natural") == "water":
+            # Build list of [lon, lat] coordinates for this waterway
+            coords = []
+            for nid in way.get("nodes", []):
+                if nid in nodes_dict:
+                    n = nodes_dict[nid]
+                    coords.append([n["lon"], n["lat"]])
+            
+            if len(coords) >= 2:
+                features.append({
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": coords
+                    },
+                    "properties": {
+                        "name": tags.get("name") or "Waterway",
+                        "type": "waterway",
+                        "waterway_type": tags.get("waterway") or tags.get("natural")
+                    }
+                })
+    return features
+
+
 def export_to_geojson(
     G: nx.DiGraph,
     route_before: List[int],
@@ -416,7 +580,10 @@ def export_to_geojson(
     facilities: Dict,
     incident_coords: Tuple[float, float],
     incident_event: Dict,
-    filename: str = "disaster_scene.geojson"
+    filename: str = "disaster_scene.geojson",
+    weather_metadata: Dict = None,
+    route_analysis: Dict = None,
+    waterway_features: List = None
 ) -> None:
     """
     Export all simulation layers to a React Leaflet compatible GeoJSON file.
@@ -573,14 +740,32 @@ def export_to_geojson(
             }
         })
         
+    # 9. Waterways
+    if waterway_features:
+        features.extend(waterway_features)
+
     geojson = {
         "type": "FeatureCollection",
-        "features": features
+        "features": features,
+        "weather_metadata": weather_metadata,
+        "route_analysis": route_analysis
     }
     
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(geojson, f, indent=2)
     logger.info(f"✓ Saved disaster scene GeoJSON layers to '{filename}' ready for React Leaflet frontend!")
+
+    # Duplicate to frontend public folder for dynamic Leaflet hot-reloads
+    import os
+    frontend_public = os.path.join("frontend", "public")
+    if os.path.exists(frontend_public):
+        copy_path = os.path.join(frontend_public, os.path.basename(filename))
+        try:
+            with open(copy_path, "w", encoding="utf-8") as f:
+                json.dump(geojson, f, indent=2)
+            logger.info(f"✓ Also duplicated to '{copy_path}' for React Leaflet.")
+        except Exception as e:
+            logger.warning(f"Could not duplicate GeoJSON to {copy_path}: {e}")
 
 
 # ============================================================================
@@ -861,69 +1046,144 @@ def main():
 
     # Instantiate Sentinel-1 satellite loader and extract the segmented flood polygon dynamically
     sentinel_loader = SentinelFloodLoader()
-    flood_polygon = sentinel_loader.get_latest_flood_polygon(mangaluru_lat, mangaluru_lon, water_coords=water_coords, rain_1h=rain_1h)
+    flood_polygon_m1 = sentinel_loader.get_latest_flood_polygon(mangaluru_lat, mangaluru_lon, water_coords=water_coords, rain_1h=rain_1h)
     
-    logger.info("\n🌊 Tracing Sentinel-1 satellite flood extent polygon from dynamic segmentation...")
-    logger.info(f"   Vertices: {flood_polygon}")
+    logger.info("\n🌊 Tracing Sentinel-1 satellite flood extent polygon from dynamic segmentation (Method 1)...")
+    logger.info(f"   Vertices: {flood_polygon_m1}")
     
-    blocked, slowed = apply_dynamic_risk_model(G_di, flood_polygon, rain_1h, mangaluru_lat, mangaluru_lon, buffer_distance_m=buffer_distance_m, water_coords=water_coords)
+    # Run Method 1 (Satellite)
+    G_m1 = G_di.copy()
+    blocked_m1, slowed_m1 = apply_dynamic_risk_model(G_m1, flood_polygon_m1, rain_1h, mangaluru_lat, mangaluru_lon, buffer_distance_m=buffer_distance_m, water_coords=water_coords)
     
-    # Print distinct blocked roads
-    blocked_names = sorted(list(set([name for _, _, name in blocked])))
-    slowed_names = sorted(list(set([name for _, _, name in slowed if name not in blocked_names])))
+    blocked_names_m1 = sorted(list(set([name for _, _, name in blocked_m1])))
+    slowed_names_m1 = sorted(list(set([name for _, _, name in slowed_m1 if name not in blocked_names_m1])))
     
-    logger.info(f"🚫 Blocked roads intersecting satellite flood polygon: {', '.join(blocked_names) if blocked_names else 'None'}")
-    logger.info(f"⚠️ Slow zones near flood polygon: {', '.join(slowed_names) if slowed_names else 'None'}")
+    logger.info(f"🚫 Blocked roads (Method 1): {', '.join(blocked_names_m1) if blocked_names_m1 else 'None'}")
+    logger.info(f"⚠️ Slow zones (Method 1): {', '.join(slowed_names_m1) if slowed_names_m1 else 'None'}")
     
-    logger.info(f"\n🗺️ Recalculating route around flood zone...")
-    route_after, cost_after = find_safest_route(G_di, start_node, incident_node)
+    logger.info(f"\n🗺️ Recalculating route around flood zone (Method 1)...")
+    route_after_m1, cost_after_m1 = find_safest_route(G_m1, start_node, incident_node)
     
-    if route_after:
-        logger.info("\n✅ Alternative Route (After Flood):")
-        print_route_details(route_after, G_di, cost_after)
-        
-        time_increase = ((cost_after - cost_before) / cost_before) * 100
-        logger.info(f"\n📊 Route Analysis:")
-        logger.info(f"   Before flood: {cost_before:.1f}s ({cost_before/60:.1f} min)")
-        logger.info(f"   After flood:  {cost_after:.1f}s ({cost_after/60:.1f} min)")
-        logger.info(f"   Increase:     {time_increase:.1f}%")
+    if route_after_m1:
+        logger.info("\n✅ Alternative Route (After Flood - Method 1):")
+        print_route_details(route_after_m1, G_m1, cost_after_m1)
+        time_increase_m1 = ((cost_after_m1 - cost_before) / cost_before) * 100
     else:
-        logger.warning("\n❌ No route available! Incident node is completely isolated inside the flood polygon.")
+        logger.warning("\n❌ No route available for Method 1!")
+        time_increase_m1 = 0.0
         
-    # Highlight routing by calculating a route from the station to a safe shelter outside the flood zone
-    route_shelter = []
+    route_shelter_m1 = []
     if facilities["shelters"]:
         target_shelter = facilities["shelters"][0]
-        shelter_node = target_shelter["node"]
-        logger.info(f"\n🗺️ Dispatching station vehicle to shelter '{target_shelter['name']}' (Node {shelter_node}) bypassing flood...")
-        route_shelter, cost_shelter = find_safest_route(G_di, start_node, shelter_node)
-        if route_shelter:
-            logger.info("✅ Detour Route to Shelter found:")
-            print_route_details(route_shelter, G_di, cost_shelter)
-        else:
-            logger.warning("❌ No route to shelter available!")
+        route_shelter_m1, cost_shelter_m1 = find_safest_route(G_m1, start_node, target_shelter["node"])
         
+    # Run Method 2 (River Gauge + DEM)
+    logger.info("\n🌊 Simulating Method 2: River Gauge + DEM...")
+    current_level = 8.2
+    normal_level = 5.0
+    G_m2 = G_di.copy()
+    flood_polygon_m2, blocked_m2, slowed_m2 = apply_river_gauge_dem_model(G_m2, current_level=current_level, normal_level=normal_level, center_lat=mangaluru_lat, center_lon=mangaluru_lon, water_coords=water_coords)
+    
+    blocked_names_m2 = sorted(list(set([name for _, _, name in blocked_m2])))
+    slowed_names_m2 = sorted(list(set([name for _, _, name in slowed_m2 if name not in blocked_names_m2])))
+    
+    logger.info(f"🚫 Blocked roads (Method 2): {', '.join(blocked_names_m2) if blocked_names_m2 else 'None'}")
+    logger.info(f"⚠️ Slow zones (Method 2): {', '.join(slowed_names_m2) if slowed_names_m2 else 'None'}")
+    
+    logger.info(f"\n🗺️ Recalculating route around flood zone (Method 2)...")
+    route_after_m2, cost_after_m2 = find_safest_route(G_m2, start_node, incident_node)
+    
+    if route_after_m2:
+        logger.info("\n✅ Alternative Route (After Flood - Method 2):")
+        print_route_details(route_after_m2, G_m2, cost_after_m2)
+        time_increase_m2 = ((cost_after_m2 - cost_before) / cost_before) * 100
+    else:
+        logger.warning("\n❌ No route available for Method 2!")
+        time_increase_m2 = 0.0
+        
+    route_shelter_m2 = []
+    if facilities["shelters"]:
+        target_shelter = facilities["shelters"][0]
+        route_shelter_m2, cost_shelter_m2 = find_safest_route(G_m2, start_node, target_shelter["node"])
+
     # ------------------------------------------------------------------------
     # STEP 5: Multi-vehicle dispatch
     # ------------------------------------------------------------------------
-    dispatch_rescue_fleet(G_di, facilities, [incident_node])
+    dispatch_rescue_fleet(G_m1, facilities, [incident_node])
     
     # ------------------------------------------------------------------------
     # STEP 6: Evacuation planning
     # ------------------------------------------------------------------------
-    find_nearest_safe_zones(G_di, facilities, incident_node)
+    find_nearest_safe_zones(G_m1, facilities, incident_node)
     
+    # Extract waterways as GeoJSON features
+    waterway_features = extract_waterway_geojson_features(osm_data)
+
     # Export results to React Leaflet compatible GeoJSON
+    weather_meta = {
+        "temp": temp,
+        "humidity": humidity,
+        "wind_speed": wind_speed,
+        "rain_1h": rain_1h,
+        "description": weather_desc
+    }
+    
+    # Export Method 1
+    route_analysis_m1 = {
+        "cost_before": cost_before,
+        "cost_after": cost_after_m1 if route_after_m1 else cost_before,
+        "time_increase_pct": time_increase_m1
+    }
     export_to_geojson(
-        G=G_di,
+        G=G_m1,
         route_before=route_before,
-        route_after=route_after,
-        route_shelter=route_shelter,
-        flood_polygon=flood_polygon,
+        route_after=route_after_m1,
+        route_shelter=route_shelter_m1,
+        flood_polygon=flood_polygon_m1,
         facilities=facilities,
         incident_coords=incident_coords,
         incident_event=incident_event,
-        filename="disaster_scene.geojson"
+        filename="disaster_scene_method1.geojson",
+        weather_metadata=weather_meta,
+        route_analysis=route_analysis_m1,
+        waterway_features=waterway_features
+    )
+    
+    # Export Method 2
+    route_analysis_m2 = {
+        "cost_before": cost_before,
+        "cost_after": cost_after_m2 if route_after_m2 else cost_before,
+        "time_increase_pct": time_increase_m2
+    }
+    export_to_geojson(
+        G=G_m2,
+        route_before=route_before,
+        route_after=route_after_m2,
+        route_shelter=route_shelter_m2,
+        flood_polygon=flood_polygon_m2,
+        facilities=facilities,
+        incident_coords=incident_coords,
+        incident_event=incident_event,
+        filename="disaster_scene_method2.geojson",
+        weather_metadata=weather_meta,
+        route_analysis=route_analysis_m2,
+        waterway_features=waterway_features
+    )
+    
+    # For backward compatibility, also export default disaster_scene.geojson
+    export_to_geojson(
+        G=G_m1,
+        route_before=route_before,
+        route_after=route_after_m1,
+        route_shelter=route_shelter_m1,
+        flood_polygon=flood_polygon_m1,
+        facilities=facilities,
+        incident_coords=incident_coords,
+        incident_event=incident_event,
+        filename="disaster_scene.geojson",
+        weather_metadata=weather_meta,
+        route_analysis=route_analysis_m1,
+        waterway_features=waterway_features
     )
     
     logger.info("\n" + "=" * 70)
@@ -932,7 +1192,7 @@ def main():
     logger.info("\n✓ Successfully verified integration with actual OpenStreetMap data.")
     logger.info("✓ Mapped real-world coordinates to graph nodes dynamically.")
     logger.info("✓ Evaluated and avoided simulated localized flood zones.")
-    logger.info("✓ Exported React Leaflet GeoJSON layer output to 'disaster_scene.geojson'.")
+    logger.info("✓ Exported React Leaflet GeoJSON layer output files.")
     logger.info("\n" + "=" * 70)
 
 
