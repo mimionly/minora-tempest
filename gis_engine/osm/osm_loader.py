@@ -72,26 +72,45 @@ class OSMLoader:
         
         logger.info(f"Fetching real OSM data for BBOX: {min_lat},{min_lon},{max_lat},{max_lon}...")
         
-        # Overpass QL query to get nodes and ways for highways
+        # Overpass QL query to get nodes and ways for highways, hospitals, shelters, and rescue stations
         query = f"""
         [out:json][timeout:25];
         (
           way["highway"]({min_lat},{min_lon},{max_lat},{max_lon});
+          node["amenity"~"hospital|clinic|shelter|community_centre|school|fire_station"]({min_lat},{min_lon},{max_lat},{max_lon});
+          way["amenity"~"hospital|clinic|shelter|community_centre|school|fire_station"]({min_lat},{min_lon},{max_lat},{max_lon});
+          node["healthcare"]({min_lat},{min_lon},{max_lat},{max_lon});
+          way["healthcare"]({min_lat},{min_lon},{max_lat},{max_lon});
+          node["emergency"~"ambulance_station"]({min_lat},{min_lon},{max_lat},{max_lon});
+          way["emergency"~"ambulance_station"]({min_lat},{min_lon},{max_lat},{max_lon});
         );
         out body;
         >;
         out skel qt;
         """
         
-        url = "https://overpass.kumi.systems/api/interpreter"
-        req = urllib.request.Request(url, data=query.encode('utf-8'), method='POST')
-        req.add_header('User-Agent', 'CivicAutopilot/1.0')
+        endpoints = [
+            "https://overpass-api.de/api/interpreter",
+            "https://overpass.openstreetmap.fr/api/interpreter",
+            "https://overpass.private.coffee/api/interpreter",
+            "https://overpass.kumi.systems/api/interpreter"
+        ]
         
-        try:
-            with urllib.request.urlopen(req, timeout=15) as response:
-                data = json.loads(response.read().decode('utf-8'))
-        except Exception as e:
-            logger.error(f"Failed to fetch from Overpass API: {e}")
+        data = None
+        for url in endpoints:
+            logger.info(f"Connecting to Overpass API at {url}...")
+            req = urllib.request.Request(url, data=query.encode('utf-8'), method='POST')
+            req.add_header('User-Agent', 'CivicAutopilot/1.0')
+            try:
+                with urllib.request.urlopen(req, timeout=20) as response:
+                    data = json.loads(response.read().decode('utf-8'))
+                    logger.info("Successfully fetched data from Overpass API.")
+                    break
+            except Exception as e:
+                logger.warning(f"Failed to fetch from Overpass endpoint {url}: {e}")
+                
+        if not data:
+            logger.error("All Overpass API endpoints failed or timed out.")
             return {"nodes": {}, "ways": {}, "relations": {}}
             
         return self._parse_overpass_json(data)
