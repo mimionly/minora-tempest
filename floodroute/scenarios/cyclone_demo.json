@@ -1,7 +1,0 @@
-{
-  "events": [
-    { "roadId": "way/123456", "depth_cm": 65, "timestamp_offset_s": 0 },
-    { "roadId": "way/123789", "depth_cm": 40, "timestamp_offset_s": 15 },
-    { "roadId": "way/124001", "depth_cm": 80, "timestamp_offset_s": 30 }
-  ]
-}

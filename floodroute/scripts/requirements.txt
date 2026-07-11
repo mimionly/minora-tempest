@@ -1,3 +1,0 @@
-osmnx==1.9.3
-networkx==3.3
-requests==2.32.3

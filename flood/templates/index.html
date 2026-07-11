@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50 text-slate-800">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flood-Aware Dispatch Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="h-full flex flex-col font-sans antialiased">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm z-10">
+        <div class="flex items-center space-x-3">
+            <div class="h-3 w-3 rounded-full bg-blue-600 animate-pulse"></div>
+            <h1 class="text-xl font-bold tracking-tight text-slate-900">AERO-ROUTING // EMERGENCY NAV ENGINE</h1>
+        </div>
+        <div class="text-xs font-mono text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded">
+            SYSTEM BOUNDARY: MANGALURU LIGHT-MAP MATRIX
+        </div>
+    </header>
+
+    <!-- Main Workspace Matrix -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Sidebar Controls -->
+        <section class="w-96 bg-white border-r border-slate-200 p-6 flex flex-col justify-between overflow-y-auto shadow-sm z-10">
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Target Operating Boundary</label>
+                    <select id="citySelect" onchange="panMapToCity()" class="w-full bg-slate-50 border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-blue-500 transition-all">
+                        <option value="Mangaluru">Mangaluru Localities (Coastal Zone)</option>
+                        <option value="Patna">Patna Localities (Gangetic Basin)</option>
+                    </select>
+                </div>
+
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-3 text-xs font-mono">
+                    <h3 class="font-bold text-slate-700 uppercase tracking-wide">Deployment Coordinates</h3>
+                    <p class="text-slate-600"><strong class="text-amber-600">Origin (A):</strong> Click on Map to drop anchor</p>
+                    <p class="text-slate-600"><strong class="text-blue-600">Destination (B):</strong> Click again to point target</p>
+                </div>
+
+                <div class="space-y-2">
+                    <button onclick="computeSafeRoute()" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold py-3 px-4 rounded-md transition-all shadow-md active:scale-[0.98]">
+                        Calculate Flood-Aware Route
+                    </button>
+                    
+                    <button onclick="clearMapLayers()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold py-2 px-4 rounded-md transition-all active:scale-[0.98]">
+                        Reset Origin & Destination Locations
+                    </button>
+                </div>
+            </div>
+
+            <!-- Operational Telemetry -->
+            <div id="metricsPanel" class="mt-8 border-t border-slate-200 pt-6 space-y-4 hidden">
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500">Live Computational Telemetry</h3>
+                <div class="grid grid-cols-2 gap-3 font-mono">
+                    <div class="bg-slate-50 p-3 border border-slate-200 rounded">
+                        <span class="block text-[10px] text-slate-400 uppercase">Risk Tier</span>
+                        <span id="metricTier" class="text-sm font-bold text-rose-600">--</span>
+                    </div>
+                    <div class="bg-slate-50 p-3 border border-slate-200 rounded">
+                        <span class="block text-[10px] text-slate-400 uppercase">Score Matrix</span>
+                        <span id="metricScore" class="text-sm font-bold text-amber-600">--</span>
+                    </div>
+                    <div class="bg-slate-50 p-3 border border-slate-200 rounded col-span-2">
+                        <span class="block text-[10px] text-slate-400 uppercase">In-Memory Sync Processing</span>
+                        <span id="metricLatency" class="text-sm font-bold text-emerald-600">--</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Layer Workspace -->
+        <section class="flex-1 relative bg-slate-100">
+            <div id="map" class="absolute inset-0"></div>
+        </section>
+    </main>
+
+    <script>
+        const cityFocus = {
+            "Mangaluru": [12.8701, 74.8800],
+            "Patna": [25.5941, 85.1376]
+        };
+
+        let map = L.map('map', { zoomControl: false }).setView(cityFocus["Mangaluru"], 14);
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            maxZoom: 20
+        }).addTo(map);
+
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        let startMarker = null;
+        let endMarker = null;
+        let currentRouteLine = null;
+        let networkNodesLayer = L.layerGroup().addTo(map);
+
+        function panMapToCity() {
+            const city = document.getElementById("citySelect").value;
+            map.flyTo(cityFocus[city], 14);
+            clearMapLayers();
+        }
+
+        function clearMapLayers() {
+            if(startMarker) map.removeLayer(startMarker);
+            if(endMarker) map.removeLayer(endMarker);
+            if(currentRouteLine) map.removeLayer(currentRouteLine);
+            networkNodesLayer.clearLayers();
+            startMarker = null;
+            endMarker = null;
+            currentRouteLine = null;
+            document.getElementById("metricsPanel").classList.add("hidden");
+        }
+
+        map.on('click', function(e) {
+            if (!startMarker) {
+                startMarker = L.marker(e.latlng).addTo(map).bindPopup("<b>Origin Point (A)</b>").openPopup();
+            } else if (!endMarker) {
+                endMarker = L.marker(e.latlng).addTo(map).bindPopup("<b>Safe Destination Zone (B)</b>").openPopup();
+            }
+        });
+
+        function computeSafeRoute() {
+            if (!startMarker || !endMarker) {
+                alert("Provide operating boundaries by dropping markers on the active map canvas.");
+                return;
+            }
+
+            const payload = {
+                city: document.getElementById("citySelect").value,
+                start: [startMarker.getLatLng().lat, startMarker.getLatLng().lng],
+                end: [endMarker.getLatLng().lat, endMarker.getLatLng().lng]
+            };
+
+            fetch('/api/route', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    document.getElementById("metricsPanel").classList.remove("hidden");
+                    document.getElementById("metricTier").innerText = data.risk_tier;
+                    document.getElementById("metricScore").innerText = data.risk_score;
+                    document.getElementById("metricLatency").innerText = data.latency_ms + " ms";
+
+                    if (currentRouteLine) map.removeLayer(currentRouteLine);
+                    networkNodesLayer.clearLayers();
+
+                    // Render all intersecting graph nodes onto the road alignments
+                    data.nodes.forEach(nodeCoords => {
+                        L.circleMarker(nodeCoords, {
+                            radius: 2.5,
+                            fillColor: '#475569',
+                            color: '#64748b',
+                            weight: 1,
+                            opacity: 0.4,
+                            fillOpacity: 0.3
+                        }).addTo(networkNodesLayer);
+                    });
+
+                    // Draw the primary safety navigation vector
+                    currentRouteLine = L.polyline(data.route, {
+                        color: '#2563eb', 
+                        weight: 6,
+                        opacity: 0.9,
+                        lineJoin: 'round'
+                    }).addTo(map);
+
+                    map.fitBounds(currentRouteLine.getBounds(), { padding: [50, 50] });
+                } else {
+                    alert("Routing Error: " + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Computational connection lost with navigation engine.");
+            });
+        }
+    </script>
+</body>
+</html>
