@@ -28,12 +28,14 @@ class SentinelFloodLoader:
         """
         self.threshold = backscatter_threshold_db
 
-    def download_sar_scene(self, center_lat: float, center_lon: float, grid_size: int = 20) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def download_sar_scene(self, center_lat: float, center_lon: float, grid_size: int = 20, water_coords: List[Tuple[float, float]] = None, rain_1h: float = 0.0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Simulate fetching a Sentinel-1 SAR intensity grid centered at coordinates.
-        Creates a mock river corridor that has swollen into a flood plain.
+        Creates a swollen flood plain along the real waterways if available, or falls back to a mock diagonal corridor.
         """
         logger.info(f"Simulating Sentinel-1 SAR download for scene centered at ({center_lat:.5f}, {center_lon:.5f})...")
+        
+        from scipy.spatial import KDTree
         
         # Define geographic coordinate ranges for the grid
         # Spanning ~2.0km x 2.0km area
@@ -43,23 +45,42 @@ class SentinelFloodLoader:
         # Grid of backscatter coefficients (dB values from -30dB to -5dB)
         sar_grid = np.zeros((grid_size, grid_size))
         
-        # Simulate a low-lying river corridor running diagonally from NW to SE (with swelling flood waters)
-        # Equation: lat = center_lat + (lon - center_lon) - 0.002
+        # Build KDTree for water coordinates (in degrees) to look up nearest waterbodies quickly
+        water_tree = None
+        if water_coords:
+            water_tree = KDTree(np.array(water_coords))
+            logger.info(f"Using {len(water_coords)} real OSM waterway points for SAR scene synthesis.")
+            
         for r in range(grid_size):
             cell_lat = lat_grid[r]
             for c in range(grid_size):
                 cell_lon = lon_grid[c]
                 
-                # Distance of the cell to the simulated river corridor line
-                dist_to_river = abs(cell_lat - (center_lat + (cell_lon - center_lon) - 0.002))
-                
-                # If close to the river corridor, simulate low backscatter (standing water ~ -20 dB)
-                # swollen river flood zone: cells within ~0.004 degrees of river path
-                if dist_to_river <= 0.004:
-                    backscatter = -21.0 + np.random.uniform(-1.5, 1.5)
+                if water_tree:
+                    # Query distance in degrees to the nearest real waterway point
+                    dist_deg, _ = water_tree.query([cell_lat, cell_lon])
+                    # 1 degree is roughly 111,000 meters
+                    dist_to_river_m = dist_deg * 111000.0
+                    
+                    # Dynamically scale flood distance threshold based on rainfall:
+                    # Base threshold is 150 meters. Every 1mm/h of rainfall increases it by 30 meters, up to a 600m cap.
+                    flood_threshold_m = min(600.0, 150.0 + (rain_1h * 30.0))
+                    
+                    # If within flood_threshold_m of a real waterway, simulate low backscatter (standing water)
+                    if dist_to_river_m <= flood_threshold_m:
+                        backscatter = -21.0 + np.random.uniform(-1.5, 1.5)
+                    else:
+                        backscatter = -12.0 + np.random.uniform(-2.5, 2.5)
                 else:
-                    # Dry land backscatter (~ -12 dB)
-                    backscatter = -12.0 + np.random.uniform(-2.5, 2.5)
+                    # Fallback to simulated NW-to-SE diagonal corridor
+                    dist_to_river_deg = abs(cell_lat - (center_lat + (cell_lon - center_lon) - 0.002))
+                    # Scale the corridor width based on rainfall:
+                    # Base width is 0.002 degrees (~220m). Every 1mm/h of rainfall increases it by 0.0004 degrees, up to 0.008 max.
+                    corridor_threshold_deg = min(0.008, 0.002 + (rain_1h * 0.0004))
+                    if dist_to_river_deg <= corridor_threshold_deg:
+                        backscatter = -21.0 + np.random.uniform(-1.5, 1.5)
+                    else:
+                        backscatter = -12.0 + np.random.uniform(-2.5, 2.5)
                     
                 sar_grid[r, c] = backscatter
                 
@@ -78,7 +99,7 @@ class SentinelFloodLoader:
         logger.info(f"✓ Flood segmentation complete: classified {flooded_pixels} grid cells as flooded.")
         return classified
 
-    def get_latest_flood_polygon(self, center_lat: float, center_lon: float) -> List[Tuple[float, float]]:
+    def get_latest_flood_polygon(self, center_lat: float, center_lon: float, water_coords: List[Tuple[float, float]] = None, rain_1h: float = 0.0) -> List[Tuple[float, float]]:
         """
         Execute the full Sentinel-1 SAR pipeline and output the coordinate vertices
         of the segmented flood polygon.
@@ -86,7 +107,7 @@ class SentinelFloodLoader:
         Returns:
             List of (lat, lon) vertices forming the closed outer boundary of the flood polygon.
         """
-        sar_grid, lat_grid, lon_grid = self.download_sar_scene(center_lat, center_lon)
+        sar_grid, lat_grid, lon_grid = self.download_sar_scene(center_lat, center_lon, water_coords=water_coords, rain_1h=rain_1h)
         classified = self.segment_flood(sar_grid)
         
         # Collect geographic coordinates of all classified flood cells

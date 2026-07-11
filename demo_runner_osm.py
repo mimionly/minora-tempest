@@ -18,6 +18,7 @@ import time
 import logging
 from typing import Dict, List, Tuple
 import networkx as nx
+import numpy as np
 
 # Configure logging
 logging.basicConfig(
@@ -79,6 +80,29 @@ def route_to_gps_path(G: nx.DiGraph, route: List[int]) -> List[Tuple[float, floa
         if node in G:
             path.append((G.nodes[node]["lat"], G.nodes[node]["lon"]))
     return path
+
+
+def extract_waterway_coordinates(osm_data: Dict) -> List[Tuple[float, float]]:
+    """Extract coordinates of all waterway/water nodes from downloaded OSM data"""
+    water_coords = []
+    
+    # 1. Scan nodes directly tagged as water
+    for node_id, node in osm_data.get("nodes", {}).items():
+        tags = node.get("tags", {})
+        if "waterway" in tags or tags.get("natural") == "water":
+            water_coords.append((node["lat"], node["lon"]))
+            
+    # 2. Scan ways (rivers are usually ways containing list of node IDs)
+    nodes_dict = osm_data.get("nodes", {})
+    for way_id, way in osm_data.get("ways", {}).items():
+        tags = way.get("tags", {})
+        if "waterway" in tags or tags.get("natural") == "water":
+            for nid in way.get("nodes", []):
+                if nid in nodes_dict:
+                    n = nodes_dict[nid]
+                    water_coords.append((n["lat"], n["lon"]))
+                    
+    return list(set(water_coords))
 
 
 def point_in_polygon(lat: float, lon: float, polygon: List[Tuple[float, float]]) -> bool:
@@ -201,7 +225,7 @@ def print_route_details(path: List[int], G: nx.DiGraph, cost: float) -> None:
 # DYNAMIC PHYSICAL RISK MODEL
 # ============================================================================
 
-def apply_dynamic_risk_model(G: nx.DiGraph, flood_polygon: List[Tuple[float, float]], rain_1h: float, center_lat: float, center_lon: float, buffer_distance_m: float) -> Tuple[List, List]:
+def apply_dynamic_risk_model(G: nx.DiGraph, flood_polygon: List[Tuple[float, float]], rain_1h: float, center_lat: float, center_lon: float, buffer_distance_m: float, water_coords: List[Tuple[float, float]] = None) -> Tuple[List, List]:
     """
     Computes physical risk attributes for every edge segment in the road network:
     - length: actual road length
@@ -209,12 +233,14 @@ def apply_dynamic_risk_model(G: nx.DiGraph, flood_polygon: List[Tuple[float, flo
     - rain: active hourly rainfall
     - elevation: simulated geographic elevation profile
     - slope: segment steepness
-    - river_distance: distance to simulated river corridor
+    - river_distance: distance to real OSM waterway (falls back to simulated corridor)
     - flood_probability: calculated risk of inundation
     - risk: cumulative hazard index (flood + slope landslide risk)
     - blocked: True if flood probability is high
     """
     import math
+    from scipy.spatial import KDTree
+    
     blocked_edges = []
     slowed_edges = []
     
@@ -225,6 +251,11 @@ def apply_dynamic_risk_model(G: nx.DiGraph, flood_polygon: List[Tuple[float, flo
     min_lon, max_lon = min(lons), max(lons)
     
     lon_span = max(0.001, max_lon - min_lon)
+    
+    # Build KDTree for real water coords if provided
+    water_tree = None
+    if water_coords:
+        water_tree = KDTree(np.array(water_coords))
     
     for u, v, d in G.edges(data=True):
         u_data = G.nodes[u]
@@ -258,10 +289,15 @@ def apply_dynamic_risk_model(G: nx.DiGraph, flood_polygon: List[Tuple[float, flo
         d["slope"] = slope
         
         # 6. River Distance
-        # Perpendicular distance in degrees to the river corridor line
-        # Equation: lat = center_lat + (lon - center_lon) - 0.002
-        d_deg = abs(mid_lat - (center_lat + (mid_lon - center_lon) - 0.002)) / math.sqrt(2.0)
-        river_distance = d_deg * 111_000.0  # Convert to meters
+        if water_tree:
+            # Query distance in degrees to the nearest real water point
+            dist_deg, _ = water_tree.query([mid_lat, mid_lon])
+            river_distance = dist_deg * 111_000.0  # Convert to meters
+        else:
+            # Fallback to simulated diagonal corridor line
+            # Equation: lat = center_lat + (lon - center_lon) - 0.002
+            d_deg = abs(mid_lat - (center_lat + (mid_lon - center_lon) - 0.002)) / math.sqrt(2.0)
+            river_distance = d_deg * 111_000.0  # Convert to meters
         d["river_distance"] = river_distance
         
         # 7. Flood Probability
@@ -818,14 +854,19 @@ def main():
     else:
         logger.info(f"🌤️ No active rainfall. Using baseline waterlogging buffer: {buffer_distance_m:.1f}m")
 
+    # Extract real OSM waterways
+    logger.info("Extracting waterways from OSM data...")
+    water_coords = extract_waterway_coordinates(osm_data)
+    logger.info(f"✓ Extracted {len(water_coords)} real-world waterway/water body points.")
+
     # Instantiate Sentinel-1 satellite loader and extract the segmented flood polygon dynamically
     sentinel_loader = SentinelFloodLoader()
-    flood_polygon = sentinel_loader.get_latest_flood_polygon(mangaluru_lat, mangaluru_lon)
+    flood_polygon = sentinel_loader.get_latest_flood_polygon(mangaluru_lat, mangaluru_lon, water_coords=water_coords, rain_1h=rain_1h)
     
     logger.info("\n🌊 Tracing Sentinel-1 satellite flood extent polygon from dynamic segmentation...")
     logger.info(f"   Vertices: {flood_polygon}")
     
-    blocked, slowed = apply_dynamic_risk_model(G_di, flood_polygon, rain_1h, mangaluru_lat, mangaluru_lon, buffer_distance_m=buffer_distance_m)
+    blocked, slowed = apply_dynamic_risk_model(G_di, flood_polygon, rain_1h, mangaluru_lat, mangaluru_lon, buffer_distance_m=buffer_distance_m, water_coords=water_coords)
     
     # Print distinct blocked roads
     blocked_names = sorted(list(set([name for _, _, name in blocked])))

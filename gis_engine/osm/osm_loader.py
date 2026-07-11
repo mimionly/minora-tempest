@@ -72,7 +72,7 @@ class OSMLoader:
         
         logger.info(f"Fetching real OSM data for BBOX: {min_lat},{min_lon},{max_lat},{max_lon}...")
         
-        # Overpass QL query to get nodes and ways for highways, hospitals, shelters, and rescue stations
+        # Overpass QL query to get nodes and ways for highways, hospitals, shelters, rescue stations, and waterways
         query = f"""
         [out:json][timeout:25];
         (
@@ -83,6 +83,8 @@ class OSMLoader:
           way["healthcare"]({min_lat},{min_lon},{max_lat},{max_lon});
           node["emergency"~"ambulance_station"]({min_lat},{min_lon},{max_lat},{max_lon});
           way["emergency"~"ambulance_station"]({min_lat},{min_lon},{max_lat},{max_lon});
+          way["waterway"]({min_lat},{min_lon},{max_lat},{max_lon});
+          way["natural"="water"]({min_lat},{min_lon},{max_lat},{max_lon});
         );
         out body;
         >;
@@ -96,6 +98,7 @@ class OSMLoader:
             "https://overpass.kumi.systems/api/interpreter"
         ]
         
+
         data = None
         for url in endpoints:
             logger.info(f"Connecting to Overpass API at {url}...")
