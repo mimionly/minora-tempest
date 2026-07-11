@@ -1,0 +1,5 @@
+[
+  { "lat": 12.8698, "lon": 74.8420, "type": "hospital", "name": "Wenlock Hospital" },
+  { "lat": 12.8735, "lon": 74.8410, "type": "shelter", "name": "Town Hall Relief Camp" },
+  { "lat": 12.8916, "lon": 74.8447, "type": "fire_station", "name": "Kadri Fire Station" }
+]
