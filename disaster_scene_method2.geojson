@@ -1,0 +1,4670 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              74.8362139,
+              12.8487511
+            ],
+            [
+              74.8286418,
+              12.8475698
+            ],
+            [
+              74.8283242,
+              12.8476117
+            ],
+            [
+              74.8279637,
+              12.8477288
+            ],
+            [
+              74.8276204,
+              12.8478962
+            ],
+            [
+              74.8270024,
+              12.8484318
+            ],
+            [
+              74.8266162,
+              12.8488418
+            ],
+            [
+              74.820798,
+              12.8657878
+            ],
+            [
+              74.8153374,
+              12.8907295
+            ],
+            [
+              74.8129599,
+              12.9030702
+            ],
+            [
+              74.8128398,
+              12.9040742
+            ],
+            [
+              74.8128226,
+              12.9042331
+            ],
+            [
+              74.8128999,
+              12.9043335
+            ],
+            [
+              74.8129943,
+              12.9044172
+            ],
+            [
+              74.8138525,
+              12.904848
+            ],
+            [
+              74.8264826,
+              12.8947832
+            ],
+            [
+              74.8360758,
+              12.8839004
+            ],
+            [
+              74.8362214,
+              12.8832014
+            ],
+            [
+              74.8362708,
+              12.8808234
+            ],
+            [
+              74.8363245,
+              12.8755575
+            ],
+            [
+              74.8363505,
+              12.8529681
+            ],
+            [
+              74.836279,
+              12.8493161
+            ],
+            [
+              74.8362139,
+              12.8487511
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Sentinel-1 Flood Zone",
+        "type": "flood_zone",
+        "fill": "#0000FF",
+        "fill_opacity": 0.4,
+        "stroke": "#0000FF",
+        "stroke_width": 2
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8414418,
+            12.8595401
+          ],
+          [
+            74.8411401,
+            12.8595703
+          ],
+          [
+            74.841074,
+            12.8596513
+          ],
+          [
+            74.8409835,
+            12.85974
+          ],
+          [
+            74.8406979,
+            12.8600244
+          ],
+          [
+            74.840546,
+            12.8601221
+          ],
+          [
+            74.840426,
+            12.8602081
+          ],
+          [
+            74.8403416,
+            12.8602629
+          ],
+          [
+            74.8401662,
+            12.8603292
+          ],
+          [
+            74.8399206,
+            12.8604315
+          ],
+          [
+            74.8398095,
+            12.8604628
+          ],
+          [
+            74.8399952,
+            12.8609956
+          ],
+          [
+            74.8405085,
+            12.8625522
+          ],
+          [
+            74.8405997,
+            12.8628504
+          ],
+          [
+            74.8407607,
+            12.8634154
+          ],
+          [
+            74.840809,
+            12.8636456
+          ],
+          [
+            74.840868,
+            12.8638811
+          ],
+          [
+            74.8409291,
+            12.8641049
+          ],
+          [
+            74.8409485,
+            12.864176
+          ],
+          [
+            74.8410437,
+            12.8641502
+          ],
+          [
+            74.8416649,
+            12.8638612
+          ],
+          [
+            74.8417512,
+            12.8638324
+          ],
+          [
+            74.8420895,
+            12.8637195
+          ],
+          [
+            74.8424043,
+            12.8636837
+          ],
+          [
+            74.8426014,
+            12.8637057
+          ],
+          [
+            74.8426815,
+            12.8637384
+          ],
+          [
+            74.8428403,
+            12.86412
+          ],
+          [
+            74.8428772,
+            12.864155
+          ],
+          [
+            74.8429141,
+            12.8641865
+          ],
+          [
+            74.8430053,
+            12.8642471
+          ],
+          [
+            74.8430404,
+            12.864275
+          ],
+          [
+            74.8430754,
+            12.8643113
+          ],
+          [
+            74.8431025,
+            12.8643689
+          ],
+          [
+            74.8431028,
+            12.8644428
+          ],
+          [
+            74.8431039,
+            12.8647203
+          ],
+          [
+            74.8430786,
+            12.8655026
+          ],
+          [
+            74.8444163,
+            12.86538
+          ],
+          [
+            74.8449858,
+            12.8652926
+          ],
+          [
+            74.8452668,
+            12.8651485
+          ],
+          [
+            74.8455503,
+            12.8658313
+          ],
+          [
+            74.8455856,
+            12.8659795
+          ],
+          [
+            74.8456306,
+            12.8662435
+          ],
+          [
+            74.8458355,
+            12.866228
+          ],
+          [
+            74.8464865,
+            12.8662162
+          ],
+          [
+            74.8472391,
+            12.8662698
+          ],
+          [
+            74.8474552,
+            12.8662934
+          ],
+          [
+            74.8481905,
+            12.866347
+          ],
+          [
+            74.8483065,
+            12.8663723
+          ],
+          [
+            74.8483694,
+            12.8663863
+          ],
+          [
+            74.8483561,
+            12.8664873
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Safe Conditions Route",
+        "type": "route_before",
+        "color": "#28a745",
+        "width": 5,
+        "opacity": 0.8
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8414418,
+            12.8595401
+          ],
+          [
+            74.8411401,
+            12.8595703
+          ],
+          [
+            74.841074,
+            12.8596513
+          ],
+          [
+            74.8409835,
+            12.85974
+          ],
+          [
+            74.8406979,
+            12.8600244
+          ],
+          [
+            74.840546,
+            12.8601221
+          ],
+          [
+            74.840426,
+            12.8602081
+          ],
+          [
+            74.8403416,
+            12.8602629
+          ],
+          [
+            74.8401662,
+            12.8603292
+          ],
+          [
+            74.8399206,
+            12.8604315
+          ],
+          [
+            74.8398095,
+            12.8604628
+          ],
+          [
+            74.8399952,
+            12.8609956
+          ],
+          [
+            74.8405085,
+            12.8625522
+          ],
+          [
+            74.8405997,
+            12.8628504
+          ],
+          [
+            74.8407607,
+            12.8634154
+          ],
+          [
+            74.840809,
+            12.8636456
+          ],
+          [
+            74.840868,
+            12.8638811
+          ],
+          [
+            74.8409291,
+            12.8641049
+          ],
+          [
+            74.8409485,
+            12.864176
+          ],
+          [
+            74.8410437,
+            12.8641502
+          ],
+          [
+            74.8416649,
+            12.8638612
+          ],
+          [
+            74.8417512,
+            12.8638324
+          ],
+          [
+            74.8420895,
+            12.8637195
+          ],
+          [
+            74.8424043,
+            12.8636837
+          ],
+          [
+            74.8426014,
+            12.8637057
+          ],
+          [
+            74.8426815,
+            12.8637384
+          ],
+          [
+            74.8428403,
+            12.86412
+          ],
+          [
+            74.8428772,
+            12.864155
+          ],
+          [
+            74.8429141,
+            12.8641865
+          ],
+          [
+            74.8430053,
+            12.8642471
+          ],
+          [
+            74.8430404,
+            12.864275
+          ],
+          [
+            74.8430754,
+            12.8643113
+          ],
+          [
+            74.8431025,
+            12.8643689
+          ],
+          [
+            74.8431028,
+            12.8644428
+          ],
+          [
+            74.8431039,
+            12.8647203
+          ],
+          [
+            74.8430786,
+            12.8655026
+          ],
+          [
+            74.8444163,
+            12.86538
+          ],
+          [
+            74.8449858,
+            12.8652926
+          ],
+          [
+            74.8452668,
+            12.8651485
+          ],
+          [
+            74.8455503,
+            12.8658313
+          ],
+          [
+            74.8455856,
+            12.8659795
+          ],
+          [
+            74.8456306,
+            12.8662435
+          ],
+          [
+            74.8458355,
+            12.866228
+          ],
+          [
+            74.8464865,
+            12.8662162
+          ],
+          [
+            74.8472391,
+            12.8662698
+          ],
+          [
+            74.8474552,
+            12.8662934
+          ],
+          [
+            74.8481905,
+            12.866347
+          ],
+          [
+            74.8483065,
+            12.8663723
+          ],
+          [
+            74.8483694,
+            12.8663863
+          ],
+          [
+            74.8483561,
+            12.8664873
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Alternative Route (Detour)",
+        "type": "route_after",
+        "color": "#007bff",
+        "width": 6,
+        "opacity": 0.9,
+        "dashArray": "5, 5"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8414418,
+            12.8595401
+          ],
+          [
+            74.8411401,
+            12.8595703
+          ],
+          [
+            74.841074,
+            12.8596513
+          ],
+          [
+            74.8409835,
+            12.85974
+          ],
+          [
+            74.8406979,
+            12.8600244
+          ],
+          [
+            74.840546,
+            12.8601221
+          ],
+          [
+            74.840426,
+            12.8602081
+          ],
+          [
+            74.8403416,
+            12.8602629
+          ],
+          [
+            74.8401662,
+            12.8603292
+          ],
+          [
+            74.8399206,
+            12.8604315
+          ],
+          [
+            74.8398095,
+            12.8604628
+          ],
+          [
+            74.8399952,
+            12.8609956
+          ],
+          [
+            74.8405085,
+            12.8625522
+          ],
+          [
+            74.8405997,
+            12.8628504
+          ],
+          [
+            74.8407607,
+            12.8634154
+          ],
+          [
+            74.840809,
+            12.8636456
+          ],
+          [
+            74.840868,
+            12.8638811
+          ],
+          [
+            74.8409291,
+            12.8641049
+          ],
+          [
+            74.8409485,
+            12.864176
+          ],
+          [
+            74.8410437,
+            12.8641502
+          ],
+          [
+            74.8416649,
+            12.8638612
+          ],
+          [
+            74.8417512,
+            12.8638324
+          ],
+          [
+            74.8420895,
+            12.8637195
+          ],
+          [
+            74.8424043,
+            12.8636837
+          ],
+          [
+            74.8426014,
+            12.8637057
+          ],
+          [
+            74.8426815,
+            12.8637384
+          ],
+          [
+            74.8428403,
+            12.86412
+          ],
+          [
+            74.8428772,
+            12.864155
+          ],
+          [
+            74.8429141,
+            12.8641865
+          ],
+          [
+            74.8430053,
+            12.8642471
+          ],
+          [
+            74.8430404,
+            12.864275
+          ],
+          [
+            74.8430754,
+            12.8643113
+          ],
+          [
+            74.8431025,
+            12.8643689
+          ],
+          [
+            74.8431028,
+            12.8644428
+          ],
+          [
+            74.8431039,
+            12.8647203
+          ],
+          [
+            74.8430786,
+            12.8655026
+          ],
+          [
+            74.8430889,
+            12.8659828
+          ],
+          [
+            74.8431039,
+            12.8663854
+          ],
+          [
+            74.8429851,
+            12.8667748
+          ],
+          [
+            74.8427005,
+            12.8677075
+          ],
+          [
+            74.8426927,
+            12.8677361
+          ],
+          [
+            74.8426766,
+            12.867795
+          ],
+          [
+            74.8427484,
+            12.8677892
+          ],
+          [
+            74.8431899,
+            12.8677686
+          ],
+          [
+            74.8435042,
+            12.8677781
+          ],
+          [
+            74.8441319,
+            12.8678283
+          ],
+          [
+            74.8443387,
+            12.8678339
+          ],
+          [
+            74.8442978,
+            12.8686945
+          ],
+          [
+            74.8442237,
+            12.869321
+          ],
+          [
+            74.8437223,
+            12.8691228
+          ],
+          [
+            74.8436362,
+            12.8690963
+          ],
+          [
+            74.8435771,
+            12.8691092
+          ],
+          [
+            74.8435305,
+            12.8691372
+          ],
+          [
+            74.8435114,
+            12.8691787
+          ],
+          [
+            74.8435035,
+            12.8692235
+          ],
+          [
+            74.8436817,
+            12.8694331
+          ],
+          [
+            74.843856,
+            12.8697247
+          ],
+          [
+            74.843907,
+            12.8699109
+          ],
+          [
+            74.843929,
+            12.8700939
+          ],
+          [
+            74.8438854,
+            12.8703716
+          ],
+          [
+            74.8438728,
+            12.8705027
+          ],
+          [
+            74.8438576,
+            12.8706613
+          ],
+          [
+            74.8439687,
+            12.8710302
+          ],
+          [
+            74.8440838,
+            12.8712365
+          ],
+          [
+            74.8441033,
+            12.8712588
+          ],
+          [
+            74.8443258,
+            12.8715142
+          ],
+          [
+            74.8444167,
+            12.8715741
+          ],
+          [
+            74.8446268,
+            12.8717904
+          ],
+          [
+            74.8447714,
+            12.8719387
+          ],
+          [
+            74.8448805,
+            12.8720296
+          ],
+          [
+            74.8449436,
+            12.8721089
+          ],
+          [
+            74.8450297,
+            12.8722174
+          ],
+          [
+            74.8450592,
+            12.872352
+          ],
+          [
+            74.845148,
+            12.8725936
+          ],
+          [
+            74.8451931,
+            12.872763
+          ],
+          [
+            74.845221,
+            12.8728935
+          ],
+          [
+            74.8452244,
+            12.8730131
+          ],
+          [
+            74.8451991,
+            12.8732052
+          ],
+          [
+            74.8451732,
+            12.8733854
+          ],
+          [
+            74.8451346,
+            12.8735469
+          ],
+          [
+            74.8451553,
+            12.8736828
+          ],
+          [
+            74.8451257,
+            12.8737687
+          ],
+          [
+            74.8450748,
+            12.8738297
+          ],
+          [
+            74.8448294,
+            12.8741499
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Station to Shelter Bypass",
+        "type": "route_shelter",
+        "color": "#6f42c1",
+        "width": 5,
+        "opacity": 0.8
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8483538409832,
+          12.866590858205738
+        ]
+      },
+      "properties": {
+        "name": "Incident: Flooding trapped citizen",
+        "type": "incident",
+        "severity": "High",
+        "source": "IoT Water Sensor",
+        "color": "#dc3545",
+        "icon": "exclamation-triangle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84134924,
+          12.85978646
+        ]
+      },
+      "properties": {
+        "name": "Rescue Station (1459205289)",
+        "type": "rescue_station",
+        "color": "#fd7e14",
+        "icon": "shield-alt"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.854664,
+          12.8663995
+        ]
+      },
+      "properties": {
+        "name": "Highland Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8531752,
+          12.8796103
+        ]
+      },
+      "properties": {
+        "name": "City Hospital Research and Diagnostic Center",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8534438,
+          12.867708
+        ]
+      },
+      "properties": {
+        "name": "Medicity Polyclinic",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8562048,
+          12.8792811
+        ]
+      },
+      "properties": {
+        "name": "Mallikatta Neuro Centre",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8500681,
+          12.8680582
+        ]
+      },
+      "properties": {
+        "name": "Indira Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8382235,
+          12.886325
+        ]
+      },
+      "properties": {
+        "name": "Prasad Netralaya",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8481771,
+          12.8680216
+        ]
+      },
+      "properties": {
+        "name": "Athena Healthcare Pvt. Ltd.",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8495331,
+          12.8582191
+        ]
+      },
+      "properties": {
+        "name": "Urban Health Centre",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8566831,
+          12.8786117
+        ]
+      },
+      "properties": {
+        "name": "T. D. Johnson Memorial Clinic",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8361099,
+          12.8793959
+        ]
+      },
+      "properties": {
+        "name": "Vishal Children and Maternity Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8537695,
+          12.8803686
+        ]
+      },
+      "properties": {
+        "name": "Tejaswini Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8336959,
+          12.8879159
+        ]
+      },
+      "properties": {
+        "name": "Bhats Nurshing Home",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8480497,
+          12.8760085
+        ]
+      },
+      "properties": {
+        "name": "Vijaya Clinic General Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8521414,
+          12.8676882
+        ]
+      },
+      "properties": {
+        "name": "Urology Research Centre and Stone Clinic",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8378761,
+          12.8693068
+        ]
+      },
+      "properties": {
+        "name": "Mangalore Health Care Centre",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8399709,
+          12.8695892
+        ]
+      },
+      "properties": {
+        "name": "Tara Clinic",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8394345,
+          12.8752587
+        ]
+      },
+      "properties": {
+        "name": "Sri Sathya Sai Nursing Home, Dakshina Kannada",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8451892,
+          12.8760713
+        ]
+      },
+      "properties": {
+        "name": "Nayana Nethralaya Eye Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.854648,
+          12.8784259
+        ]
+      },
+      "properties": {
+        "name": "Sanjeevani Ayurveda Chikithsalaya",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8550181,
+          12.8724812
+        ]
+      },
+      "properties": {
+        "name": "Mangalore Nursing Home",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8531285,
+          12.8809072
+        ]
+      },
+      "properties": {
+        "name": "Vijaya Clinic and maternity Surgical Nursing Home",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8519879,
+          12.8790416
+        ]
+      },
+      "properties": {
+        "name": "Prathiba Eye Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8519135,
+          12.8676634
+        ]
+      },
+      "properties": {
+        "name": "Sanjeevini Day Care",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8298161,
+          12.8795933
+        ]
+      },
+      "properties": {
+        "name": "Spandana Hospital And Institute Of Neuro Sciences",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8395471,
+          12.8609405
+        ]
+      },
+      "properties": {
+        "name": "Dr. M. V. Shettys Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8485381,
+          12.8757698
+        ]
+      },
+      "properties": {
+        "name": "Prashanth Nethralaya",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8484812,
+          12.8717224
+        ]
+      },
+      "properties": {
+        "name": "K. M. C. Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8333959,
+          12.866504
+        ]
+      },
+      "properties": {
+        "name": "Bunder Urban Primary Health Centre",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8471767,
+          12.8796917
+        ]
+      },
+      "properties": {
+        "name": "MIO Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8477681,
+          12.8604829
+        ]
+      },
+      "properties": {
+        "name": "Dr Vishwas K Pai Ent Clinic",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8399039,
+          12.8696279
+        ]
+      },
+      "properties": {
+        "name": "Tara Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8528843,
+          12.8678722
+        ]
+      },
+      "properties": {
+        "name": "Parijma Institute of Neuro Sciences (PINS)",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8542088,
+          12.8676282
+        ]
+      },
+      "properties": {
+        "name": "Unity Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8488725375,
+          12.8720779125
+        ]
+      },
+      "properties": {
+        "name": "University Medical Center (KMC)",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84286025333334,
+          12.86708086
+        ]
+      },
+      "properties": {
+        "name": "Government Wenlock Hospital , Mangalore",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.85942309999999,
+          12.866253357142856
+        ]
+      },
+      "properties": {
+        "name": "Father Muller Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.85250268,
+          12.877633
+        ]
+      },
+      "properties": {
+        "name": "Mangala Kidney Foundation",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.85345978000001,
+          12.88009046
+        ]
+      },
+      "properties": {
+        "name": "Tejaswini Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84791645454544,
+          12.85869540909091
+        ]
+      },
+      "properties": {
+        "name": "KMC Hospital, Ambedkar Circle",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.86135440000001,
+          12.874126774999999
+        ]
+      },
+      "properties": {
+        "name": "ESI Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84658262222223,
+          12.87912558888889
+        ]
+      },
+      "properties": {
+        "name": "Vinaya nursing home",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8427851909091,
+          12.872300118181817
+        ]
+      },
+      "properties": {
+        "name": "Jayashree Nursing Home",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.85650533333335,
+          12.87269385
+        ]
+      },
+      "properties": {
+        "name": "Colaco Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83793965384615,
+          12.864898146153847
+        ]
+      },
+      "properties": {
+        "name": "Lady Goshan Hospital Mangalore",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.85510896666666,
+          12.874371266666666
+        ]
+      },
+      "properties": {
+        "name": "SCS Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83883152857142,
+          12.883149414285715
+        ]
+      },
+      "properties": {
+        "name": "Sri Dharmasthala Manjunatheshwara Eye Hospital",
+        "type": "hospital",
+        "capacity": 100,
+        "color": "#e23e57",
+        "icon": "plus-circle"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.845393,
+          12.8743451
+        ]
+      },
+      "properties": {
+        "name": "St. Aloysius School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8348249,
+          12.8893137
+        ]
+      },
+      "properties": {
+        "name": "St. Aloysius English Medium School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8389292,
+          12.8740909
+        ]
+      },
+      "properties": {
+        "name": "Canara High School Main (Boys)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8543594,
+          12.8805253
+        ]
+      },
+      "properties": {
+        "name": "Kadri Government School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8408529,
+          12.8781187
+        ]
+      },
+      "properties": {
+        "name": "Besant Primary School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8407928,
+          12.8791502
+        ]
+      },
+      "properties": {
+        "name": "Deriks Chess School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8437702,
+          12.8686751
+        ]
+      },
+      "properties": {
+        "name": "Milagres Pre University College",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8457794,
+          12.8622913
+        ]
+      },
+      "properties": {
+        "name": "Sarojini Madhusudan Kushe School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8395225,
+          12.8766702
+        ]
+      },
+      "properties": {
+        "name": "Sharada Vidyalaya",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8465063,
+          12.8562272
+        ]
+      },
+      "properties": {
+        "name": "Manipal School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8359291,
+          12.8570763
+        ]
+      },
+      "properties": {
+        "name": "Carmel English School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8433178,
+          12.863612
+        ]
+      },
+      "properties": {
+        "name": "A/C Waiting Hall(30Rs/hour)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83506768,
+          12.8844722
+        ]
+      },
+      "properties": {
+        "name": "Canara Urwa School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84069465,
+          12.8684614
+        ]
+      },
+      "properties": {
+        "name": "Ganapathy High School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83885305714286,
+          12.87402295
+        ]
+      },
+      "properties": {
+        "name": "Shelter (209735604)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83963028888888,
+          12.874166366666666
+        ]
+      },
+      "properties": {
+        "name": "Shelter (258649207)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83587006666667,
+          12.85910083809524
+        ]
+      },
+      "properties": {
+        "name": "St. Anne's School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83871062,
+          12.875130989999999
+        ]
+      },
+      "properties": {
+        "name": "Canara Girls' High School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8591282375,
+          12.8763484125
+        ]
+      },
+      "properties": {
+        "name": "St Agnes Educational Institution",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83628695,
+          12.85732525
+        ]
+      },
+      "properties": {
+        "name": "Rozario High School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.85605758333334,
+          12.86082855
+        ]
+      },
+      "properties": {
+        "name": "St. Gerosa Girls' School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.85011250769232,
+          12.850485376923077
+        ]
+      },
+      "properties": {
+        "name": "Cascia Group of Institutions",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83550615714285,
+          12.870112785714285
+        ]
+      },
+      "properties": {
+        "name": "Government Womens' Pre University College",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83090191666666,
+          12.8887479
+        ]
+      },
+      "properties": {
+        "name": "Gandhinagar School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.82291749,
+          12.88678898
+        ]
+      },
+      "properties": {
+        "name": "Amruthandamayi Vidyanilayam",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83106692727273,
+          12.885053863636363
+        ]
+      },
+      "properties": {
+        "name": "Shelter (354298470)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84518512222222,
+          12.874382555555556
+        ]
+      },
+      "properties": {
+        "name": "Sy. Aloysius High School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.86098205,
+          12.888390800000002
+        ]
+      },
+      "properties": {
+        "name": "Padua High School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83573119259259,
+          12.88903688888889
+        ]
+      },
+      "properties": {
+        "name": "Ladyhill Victoria Girls High School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83327510000001,
+          12.8763789
+        ]
+      },
+      "properties": {
+        "name": "Alake",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.85965922857143,
+          12.888120428571428
+        ]
+      },
+      "properties": {
+        "name": "Valmiki Residential School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84654281666667,
+          12.884076616666666
+        ]
+      },
+      "properties": {
+        "name": "Bejai Church Hall",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84728896363636,
+          12.883557922727272
+        ]
+      },
+      "properties": {
+        "name": "Shelter (1358318472)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.85676522,
+          12.875069920000001
+        ]
+      },
+      "properties": {
+        "name": "St.Theresa's School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8563813,
+          12.87659695
+        ]
+      },
+      "properties": {
+        "name": "St. Agnes Special School",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.83642673888889,
+          12.856538533333334
+        ]
+      },
+      "properties": {
+        "name": "Shelter (1459470352)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84585013333334,
+          12.875127266666667
+        ]
+      },
+      "properties": {
+        "name": "St. Aloysius Primary School Ground",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84359698,
+          12.863560620000001
+        ]
+      },
+      "properties": {
+        "name": "Shelter (1533003494)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84352228,
+          12.861624280000001
+        ]
+      },
+      "properties": {
+        "name": "Shelter (1533003496)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84371036,
+          12.861289039999999
+        ]
+      },
+      "properties": {
+        "name": "Shelter (1533003498)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84379258,
+          12.863750719999999
+        ]
+      },
+      "properties": {
+        "name": "Shelter (1533003515)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.8437542,
+          12.86261132
+        ]
+      },
+      "properties": {
+        "name": "Shelter (1533003535)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84328508,
+          12.861509459999999
+        ]
+      },
+      "properties": {
+        "name": "Shelter (1533003536)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.84353827999999,
+          12.86246952
+        ]
+      },
+      "properties": {
+        "name": "Shelter (1533003553)",
+        "type": "shelter",
+        "capacity": 300,
+        "color": "#28a745",
+        "icon": "home"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8378922,
+            12.8789072
+          ],
+          [
+            74.8377015,
+            12.8788838
+          ],
+          [
+            74.837444,
+            12.8788211
+          ],
+          [
+            74.8372686,
+            12.8787787
+          ],
+          [
+            74.8365068,
+            12.8785068
+          ],
+          [
+            74.8363335,
+            12.8784132
+          ],
+          [
+            74.8362477,
+            12.8782667
+          ],
+          [
+            74.8360546,
+            12.877953
+          ],
+          [
+            74.8359221,
+            12.8777328
+          ],
+          [
+            74.8358508,
+            12.8776601
+          ],
+          [
+            74.8357343,
+            12.8776648
+          ],
+          [
+            74.8356324,
+            12.8776753
+          ],
+          [
+            74.8354913,
+            12.877634
+          ],
+          [
+            74.8351963,
+            12.8774614
+          ],
+          [
+            74.834971,
+            12.8771999
+          ],
+          [
+            74.8349511,
+            12.8770948
+          ],
+          [
+            74.8349511,
+            12.8770164
+          ],
+          [
+            74.8352425,
+            12.8768232
+          ],
+          [
+            74.8350855,
+            12.8765591
+          ],
+          [
+            74.8350364,
+            12.876511
+          ],
+          [
+            74.8349593,
+            12.8764675
+          ],
+          [
+            74.8342699,
+            12.8761117
+          ],
+          [
+            74.8339303,
+            12.8758559
+          ],
+          [
+            74.8337157,
+            12.8757409
+          ],
+          [
+            74.8333525,
+            12.8755994
+          ],
+          [
+            74.8322459,
+            12.8750087
+          ],
+          [
+            74.8318596,
+            12.8747577
+          ],
+          [
+            74.8317271,
+            12.8746163
+          ],
+          [
+            74.8316412,
+            12.8742789
+          ],
+          [
+            74.8317163,
+            12.8734762
+          ],
+          [
+            74.8317786,
+            12.873161
+          ],
+          [
+            74.8316841,
+            12.8727963
+          ],
+          [
+            74.8315286,
+            12.8725322
+          ],
+          [
+            74.8309735,
+            12.8717661
+          ],
+          [
+            74.8306677,
+            12.8714209
+          ],
+          [
+            74.8302466,
+            12.8710156
+          ],
+          [
+            74.8298509,
+            12.8706958
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "stream"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.9564734,
+            12.9395681
+          ],
+          [
+            74.9553027,
+            12.9388028
+          ],
+          [
+            74.9544441,
+            12.9386936
+          ],
+          [
+            74.953217,
+            12.9384682
+          ],
+          [
+            74.9522057,
+            12.9385558
+          ],
+          [
+            74.9506908,
+            12.9384561
+          ],
+          [
+            74.9500863,
+            12.9383756
+          ],
+          [
+            74.9493405,
+            12.9380065
+          ],
+          [
+            74.9482867,
+            12.9371879
+          ],
+          [
+            74.947781,
+            12.9363229
+          ],
+          [
+            74.9481274,
+            12.93546
+          ],
+          [
+            74.9486508,
+            12.9349883
+          ],
+          [
+            74.9498882,
+            12.9337113
+          ],
+          [
+            74.9515433,
+            12.9321357
+          ],
+          [
+            74.9538264,
+            12.9294002
+          ],
+          [
+            74.9568562,
+            12.9262715
+          ],
+          [
+            74.9610264,
+            12.9224795
+          ],
+          [
+            74.962747,
+            12.9207147
+          ],
+          [
+            74.9631701,
+            12.9201753
+          ],
+          [
+            74.9633251,
+            12.9198293
+          ],
+          [
+            74.9634188,
+            12.919498
+          ],
+          [
+            74.9634696,
+            12.9191771
+          ],
+          [
+            74.9638354,
+            12.9150821
+          ],
+          [
+            74.9638016,
+            12.9147188
+          ],
+          [
+            74.9637249,
+            12.914481
+          ],
+          [
+            74.9635272,
+            12.9140849
+          ],
+          [
+            74.9624841,
+            12.912691
+          ],
+          [
+            74.9621153,
+            12.9124356
+          ],
+          [
+            74.9618335,
+            12.9123252
+          ],
+          [
+            74.9615164,
+            12.9122837
+          ],
+          [
+            74.9611184,
+            12.9122835
+          ],
+          [
+            74.9608743,
+            12.9123687
+          ],
+          [
+            74.9606657,
+            12.9125022
+          ],
+          [
+            74.9604393,
+            12.9126426
+          ],
+          [
+            74.960312,
+            12.9128244
+          ],
+          [
+            74.959962,
+            12.9135278
+          ],
+          [
+            74.9598216,
+            12.914027
+          ],
+          [
+            74.9598072,
+            12.9145273
+          ],
+          [
+            74.9598175,
+            12.9149255
+          ],
+          [
+            74.9597661,
+            12.9153537
+          ],
+          [
+            74.9596963,
+            12.9157999
+          ],
+          [
+            74.9595494,
+            12.9161975
+          ],
+          [
+            74.9592978,
+            12.9166132
+          ],
+          [
+            74.959114,
+            12.9169568
+          ],
+          [
+            74.9588192,
+            12.9172643
+          ],
+          [
+            74.9585028,
+            12.9174929
+          ],
+          [
+            74.9581863,
+            12.9176615
+          ],
+          [
+            74.9578514,
+            12.91777
+          ],
+          [
+            74.957307,
+            12.9177464
+          ],
+          [
+            74.953956,
+            12.917277
+          ],
+          [
+            74.9526495,
+            12.9170381
+          ],
+          [
+            74.9515939,
+            12.9169664
+          ],
+          [
+            74.950717,
+            12.9169727
+          ],
+          [
+            74.9495012,
+            12.9173001
+          ],
+          [
+            74.9488749,
+            12.9175179
+          ],
+          [
+            74.9483594,
+            12.9178197
+          ],
+          [
+            74.9472547,
+            12.9185336
+          ],
+          [
+            74.9460036,
+            12.9194852
+          ],
+          [
+            74.9449998,
+            12.9202394
+          ],
+          [
+            74.9440255,
+            12.9216359
+          ],
+          [
+            74.943563,
+            12.92225
+          ],
+          [
+            74.9432947,
+            12.9225571
+          ],
+          [
+            74.94278,
+            12.9228642
+          ],
+          [
+            74.9410252,
+            12.9236839
+          ],
+          [
+            74.9402091,
+            12.9239713
+          ],
+          [
+            74.9394793,
+            12.9243787
+          ],
+          [
+            74.9387988,
+            12.9248688
+          ],
+          [
+            74.9380143,
+            12.9255586
+          ],
+          [
+            74.9375605,
+            12.9258794
+          ],
+          [
+            74.9368848,
+            12.9261162
+          ],
+          [
+            74.9360975,
+            12.9264484
+          ],
+          [
+            74.9350637,
+            12.9266845
+          ],
+          [
+            74.9304384,
+            12.927351
+          ],
+          [
+            74.9292719,
+            12.9275041
+          ],
+          [
+            74.9283519,
+            12.9277773
+          ],
+          [
+            74.9257727,
+            12.9286525
+          ],
+          [
+            74.9236125,
+            12.9296959
+          ],
+          [
+            74.9208969,
+            12.9308833
+          ],
+          [
+            74.9201523,
+            12.9311731
+          ],
+          [
+            74.9192844,
+            12.9313669
+          ],
+          [
+            74.9151462,
+            12.9318077
+          ],
+          [
+            74.9137664,
+            12.9319184
+          ],
+          [
+            74.9123866,
+            12.9322692
+          ],
+          [
+            74.9113307,
+            12.9327411
+          ],
+          [
+            74.9102255,
+            12.9335733
+          ],
+          [
+            74.9084821,
+            12.9350134
+          ],
+          [
+            74.9076232,
+            12.9359019
+          ],
+          [
+            74.906789,
+            12.9369345
+          ],
+          [
+            74.9060411,
+            12.9381593
+          ],
+          [
+            74.9056671,
+            12.9387837
+          ],
+          [
+            74.9052192,
+            12.939336
+          ],
+          [
+            74.9038038,
+            12.9404155
+          ],
+          [
+            74.9031145,
+            12.9409793
+          ],
+          [
+            74.9022528,
+            12.941447
+          ],
+          [
+            74.9008412,
+            12.9420607
+          ],
+          [
+            74.8999136,
+            12.9422235
+          ],
+          [
+            74.8993529,
+            12.9422887
+          ],
+          [
+            74.8987361,
+            12.9422446
+          ],
+          [
+            74.8921313,
+            12.9414127
+          ],
+          [
+            74.8870748,
+            12.9414619
+          ],
+          [
+            74.8857353,
+            12.941419
+          ],
+          [
+            74.8843957,
+            12.941256
+          ],
+          [
+            74.8791018,
+            12.9396692
+          ],
+          [
+            74.8778758,
+            12.9393878
+          ],
+          [
+            74.8763787,
+            12.9390584
+          ],
+          [
+            74.8734831,
+            12.9385677
+          ],
+          [
+            74.8726049,
+            12.9383455
+          ],
+          [
+            74.8714014,
+            12.9383452
+          ],
+          [
+            74.8701817,
+            12.9384559
+          ],
+          [
+            74.869027,
+            12.938725
+          ],
+          [
+            74.8678637,
+            12.9393221
+          ],
+          [
+            74.8669281,
+            12.9401727
+          ],
+          [
+            74.8635018,
+            12.9443863
+          ],
+          [
+            74.8625013,
+            12.9456138
+          ],
+          [
+            74.8615756,
+            12.9468595
+          ],
+          [
+            74.8601717,
+            12.9483434
+          ],
+          [
+            74.8597049,
+            12.9487386
+          ],
+          [
+            74.8591074,
+            12.9490975
+          ],
+          [
+            74.857959,
+            12.9495785
+          ],
+          [
+            74.8567645,
+            12.9498853
+          ],
+          [
+            74.8553272,
+            12.9501374
+          ],
+          [
+            74.8541151,
+            12.950223
+          ],
+          [
+            74.8526935,
+            12.950107
+          ],
+          [
+            74.8511417,
+            12.9498641
+          ],
+          [
+            74.8501152,
+            12.9496544
+          ],
+          [
+            74.8490725,
+            12.9493972
+          ],
+          [
+            74.8481121,
+            12.9491585
+          ],
+          [
+            74.8471436,
+            12.9488644
+          ],
+          [
+            74.8431414,
+            12.9473026
+          ],
+          [
+            74.8381402,
+            12.9446843
+          ],
+          [
+            74.837115,
+            12.9439842
+          ],
+          [
+            74.8359734,
+            12.942868
+          ],
+          [
+            74.8351415,
+            12.941911
+          ],
+          [
+            74.8344792,
+            12.940771
+          ],
+          [
+            74.8336289,
+            12.9393351
+          ],
+          [
+            74.8330563,
+            12.9383801
+          ],
+          [
+            74.8324736,
+            12.9372337
+          ],
+          [
+            74.8315416,
+            12.9347531
+          ],
+          [
+            74.8308276,
+            12.9329677
+          ],
+          [
+            74.8302293,
+            12.9311542
+          ],
+          [
+            74.8297787,
+            12.9299432
+          ],
+          [
+            74.8292124,
+            12.9288732
+          ],
+          [
+            74.8259885,
+            12.9241551
+          ],
+          [
+            74.8238448,
+            12.9210319
+          ],
+          [
+            74.8215929,
+            12.9181898
+          ],
+          [
+            74.8180333,
+            12.9139306
+          ],
+          [
+            74.8167835,
+            12.9121181
+          ],
+          [
+            74.815714,
+            12.9102353
+          ],
+          [
+            74.8153916,
+            12.9093749
+          ],
+          [
+            74.8152856,
+            12.9086902
+          ],
+          [
+            74.8152075,
+            12.9079441
+          ],
+          [
+            74.8152376,
+            12.9073738
+          ],
+          [
+            74.8158207,
+            12.9065143
+          ],
+          [
+            74.8178253,
+            12.9035934
+          ],
+          [
+            74.8203736,
+            12.9007218
+          ],
+          [
+            74.8210373,
+            12.8998081
+          ],
+          [
+            74.8215659,
+            12.8988191
+          ],
+          [
+            74.8219175,
+            12.8978916
+          ],
+          [
+            74.822129,
+            12.8968787
+          ],
+          [
+            74.8221859,
+            12.8959787
+          ],
+          [
+            74.8220993,
+            12.8946736
+          ],
+          [
+            74.8218512,
+            12.8934314
+          ],
+          [
+            74.821551,
+            12.8926103
+          ],
+          [
+            74.8211217,
+            12.8918836
+          ],
+          [
+            74.8198342,
+            12.8906599
+          ],
+          [
+            74.8195338,
+            12.8900638
+          ],
+          [
+            74.8191905,
+            12.888495
+          ],
+          [
+            74.8193407,
+            12.8865497
+          ],
+          [
+            74.8217225,
+            12.8806719
+          ],
+          [
+            74.8246836,
+            12.8761955
+          ],
+          [
+            74.8259496,
+            12.8719491
+          ],
+          [
+            74.8258049,
+            12.8685825
+          ],
+          [
+            74.8257733,
+            12.8678884
+          ],
+          [
+            74.8257994,
+            12.8674307
+          ],
+          [
+            74.8258676,
+            12.8670345
+          ],
+          [
+            74.8259936,
+            12.8665595
+          ],
+          [
+            74.8271013,
+            12.862767
+          ],
+          [
+            74.8284891,
+            12.8579826
+          ],
+          [
+            74.8297262,
+            12.8540632
+          ],
+          [
+            74.8308169,
+            12.851401
+          ],
+          [
+            74.8310593,
+            12.8503583
+          ],
+          [
+            74.8310756,
+            12.8493471
+          ],
+          [
+            74.8310939,
+            12.8486727
+          ],
+          [
+            74.8310152,
+            12.8480297
+          ],
+          [
+            74.8305416,
+            12.8450884
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Gurupura",
+        "type": "waterway",
+        "waterway_type": "river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8313785,
+            12.8762802
+          ],
+          [
+            74.8313765,
+            12.8761933
+          ],
+          [
+            74.831184,
+            12.8761976
+          ],
+          [
+            74.831186,
+            12.8762844
+          ],
+          [
+            74.8313785,
+            12.8762802
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "water"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8557423,
+            12.8860481
+          ],
+          [
+            74.8557027,
+            12.8860294
+          ],
+          [
+            74.8555383,
+            12.8863605
+          ],
+          [
+            74.8555779,
+            12.8863792
+          ],
+          [
+            74.8557423,
+            12.8860481
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "water"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8556614,
+            12.8860609
+          ],
+          [
+            74.8556232,
+            12.8860422
+          ],
+          [
+            74.8555038,
+            12.8862743
+          ],
+          [
+            74.8555421,
+            12.886293
+          ],
+          [
+            74.8556614,
+            12.8860609
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "water"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8378635,
+            12.871252
+          ],
+          [
+            74.8378473,
+            12.8709958
+          ],
+          [
+            74.8381045,
+            12.8709802
+          ],
+          [
+            74.8381208,
+            12.8712365
+          ],
+          [
+            74.8378635,
+            12.871252
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "water"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8210897,
+            12.8700036
+          ],
+          [
+            74.8219158,
+            12.8701605
+          ],
+          [
+            74.8219587,
+            12.8703697
+          ],
+          [
+            74.821948,
+            12.8707462
+          ],
+          [
+            74.822066,
+            12.8709449
+          ],
+          [
+            74.822463,
+            12.8711437
+          ],
+          [
+            74.8228707,
+            12.8712692
+          ],
+          [
+            74.8232555,
+            12.8712774
+          ],
+          [
+            74.8233345,
+            12.8710598
+          ],
+          [
+            74.8236041,
+            12.8708486
+          ],
+          [
+            74.8238958,
+            12.8709416
+          ],
+          [
+            74.8242727,
+            12.8710128
+          ],
+          [
+            74.8245753,
+            12.8709806
+          ],
+          [
+            74.824656,
+            12.8710162
+          ],
+          [
+            74.8246191,
+            12.8710899
+          ],
+          [
+            74.8244219,
+            12.8711814
+          ],
+          [
+            74.8243025,
+            12.8712145
+          ],
+          [
+            74.8240735,
+            12.8713596
+          ],
+          [
+            74.8237272,
+            12.8714717
+          ],
+          [
+            74.8232767,
+            12.8719007
+          ],
+          [
+            74.823128,
+            12.8722775
+          ],
+          [
+            74.8230566,
+            12.8728685
+          ],
+          [
+            74.8233108,
+            12.873083
+          ],
+          [
+            74.8236056,
+            12.8732002
+          ],
+          [
+            74.8240825,
+            12.8733423
+          ],
+          [
+            74.8242067,
+            12.8734168
+          ],
+          [
+            74.8242067,
+            12.8735236
+          ],
+          [
+            74.8235608,
+            12.8752863
+          ],
+          [
+            74.8230792,
+            12.875994
+          ],
+          [
+            74.8223854,
+            12.8766528
+          ],
+          [
+            74.822175,
+            12.876696
+          ],
+          [
+            74.8220588,
+            12.8766866
+          ],
+          [
+            74.8216795,
+            12.8763579
+          ],
+          [
+            74.8213409,
+            12.8760382
+          ],
+          [
+            74.8213048,
+            12.8759345
+          ],
+          [
+            74.8212077,
+            12.875913
+          ],
+          [
+            74.8210897,
+            12.8758608
+          ],
+          [
+            74.8207249,
+            12.8757143
+          ],
+          [
+            74.8208,
+            12.8750345
+          ],
+          [
+            74.8211863,
+            12.87402
+          ],
+          [
+            74.8213955,
+            12.8722858
+          ],
+          [
+            74.8203816,
+            12.8720222
+          ],
+          [
+            74.8210897,
+            12.8700036
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Bharti Shipyard Limited, Mangalore",
+        "type": "waterway",
+        "waterway_type": "boatyard"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.86526,
+            12.8537849
+          ],
+          [
+            74.8651366,
+            12.8538332
+          ],
+          [
+            74.8648898,
+            12.8538908
+          ],
+          [
+            74.86423,
+            12.8537809
+          ],
+          [
+            74.8638277,
+            12.8537182
+          ],
+          [
+            74.8635112,
+            12.8535874
+          ],
+          [
+            74.8633556,
+            12.8533991
+          ],
+          [
+            74.8629908,
+            12.8531795
+          ],
+          [
+            74.8626743,
+            12.8530644
+          ],
+          [
+            74.862154,
+            12.8528866
+          ],
+          [
+            74.861639,
+            12.8527402
+          ],
+          [
+            74.861285,
+            12.8526512
+          ],
+          [
+            74.8604535,
+            12.8524316
+          ],
+          [
+            74.8598634,
+            12.8523008
+          ],
+          [
+            74.8597739,
+            12.8522644
+          ],
+          [
+            74.8597339,
+            12.8522271
+          ],
+          [
+            74.8597181,
+            12.8521712
+          ],
+          [
+            74.8597195,
+            12.8520744
+          ],
+          [
+            74.859708,
+            12.8519682
+          ],
+          [
+            74.8596733,
+            12.8517266
+          ],
+          [
+            74.8597352,
+            12.8517117
+          ],
+          [
+            74.8598552,
+            12.8517306
+          ],
+          [
+            74.8600024,
+            12.8517985
+          ],
+          [
+            74.8601031,
+            12.8518023
+          ],
+          [
+            74.8602503,
+            12.8517004
+          ],
+          [
+            74.8603355,
+            12.8515191
+          ],
+          [
+            74.8603471,
+            12.8513417
+          ],
+          [
+            74.8603239,
+            12.8510207
+          ],
+          [
+            74.8601612,
+            12.8507488
+          ],
+          [
+            74.860045,
+            12.8505902
+          ],
+          [
+            74.8600373,
+            12.8503977
+          ],
+          [
+            74.8600876,
+            12.8501409
+          ],
+          [
+            74.8602154,
+            12.8498842
+          ],
+          [
+            74.8603665,
+            12.8496274
+          ],
+          [
+            74.8605059,
+            12.8494386
+          ],
+          [
+            74.8606104,
+            12.8492951
+          ],
+          [
+            74.8606182,
+            12.8491441
+          ],
+          [
+            74.8605988,
+            12.8489893
+          ],
+          [
+            74.8605678,
+            12.8488533
+          ],
+          [
+            74.8605756,
+            12.8487287
+          ],
+          [
+            74.8606182,
+            12.8485777
+          ],
+          [
+            74.860777,
+            12.8484229
+          ],
+          [
+            74.8609196,
+            12.8483478
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "drain"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8436943,
+            12.8856708
+          ],
+          [
+            74.8435648,
+            12.8853578
+          ],
+          [
+            74.8433931,
+            12.8849865
+          ],
+          [
+            74.8433288,
+            12.8848035
+          ],
+          [
+            74.8433609,
+            12.8845891
+          ],
+          [
+            74.8434376,
+            12.8844526
+          ],
+          [
+            74.8434575,
+            12.8841655
+          ],
+          [
+            74.8433679,
+            12.8839506
+          ],
+          [
+            74.8432697,
+            12.8834648
+          ],
+          [
+            74.8432778,
+            12.8830517
+          ],
+          [
+            74.8432684,
+            12.8829052
+          ],
+          [
+            74.8432322,
+            12.8827902
+          ],
+          [
+            74.8431372,
+            12.8826955
+          ],
+          [
+            74.8426582,
+            12.8824503
+          ],
+          [
+            74.8424758,
+            12.8824398
+          ],
+          [
+            74.842272,
+            12.8824346
+          ],
+          [
+            74.8419662,
+            12.8823666
+          ],
+          [
+            74.8413064,
+            12.8821051
+          ],
+          [
+            74.8399928,
+            12.8813811
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "stream"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8380549,
+            12.8789145
+          ],
+          [
+            74.8378922,
+            12.8789072
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8398236,
+            12.8812847
+          ],
+          [
+            74.8397684,
+            12.8812575
+          ],
+          [
+            74.8392572,
+            12.8809233
+          ],
+          [
+            74.839107,
+            12.880735
+          ],
+          [
+            74.8389567,
+            12.8805311
+          ],
+          [
+            74.8387706,
+            12.8803214
+          ],
+          [
+            74.8386472,
+            12.8802325
+          ],
+          [
+            74.8386242,
+            12.88005
+          ],
+          [
+            74.8385973,
+            12.8798408
+          ],
+          [
+            74.8386526,
+            12.8795683
+          ],
+          [
+            74.8386563,
+            12.8792394
+          ],
+          [
+            74.8385346,
+            12.879082
+          ],
+          [
+            74.8383398,
+            12.8789256
+          ],
+          [
+            74.838136,
+            12.87891
+          ],
+          [
+            74.8380549,
+            12.8789145
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "stream"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8399928,
+            12.8813811
+          ],
+          [
+            74.8398236,
+            12.8812847
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8437935,
+            12.8864845
+          ],
+          [
+            74.8437971,
+            12.886241
+          ],
+          [
+            74.8437881,
+            12.8860626
+          ],
+          [
+            74.8437783,
+            12.8858698
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "stream"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8437783,
+            12.8858698
+          ],
+          [
+            74.8436943,
+            12.8856708
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8377217,
+            12.8530431
+          ],
+          [
+            74.8377129,
+            12.853044
+          ],
+          [
+            74.8376244,
+            12.8530923
+          ],
+          [
+            74.8374333,
+            12.8531509
+          ],
+          [
+            74.83709,
+            12.8531613
+          ],
+          [
+            74.8368705,
+            12.8531475
+          ],
+          [
+            74.8364529,
+            12.8530992
+          ],
+          [
+            74.8357698,
+            12.8530336
+          ],
+          [
+            74.8352496,
+            12.8529784
+          ],
+          [
+            74.8348036,
+            12.8528818
+          ],
+          [
+            74.8343895,
+            12.8527783
+          ],
+          [
+            74.8337419,
+            12.8526299
+          ],
+          [
+            74.8333465,
+            12.8525615
+          ],
+          [
+            74.8332747,
+            12.852554
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "drain"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.840661,
+            12.8536133
+          ],
+          [
+            74.840208,
+            12.8534856
+          ],
+          [
+            74.8398505,
+            12.8533683
+          ],
+          [
+            74.8394789,
+            12.8531544
+          ],
+          [
+            74.8392984,
+            12.8530923
+          ],
+          [
+            74.8391568,
+            12.8530992
+          ],
+          [
+            74.8388843,
+            12.8531233
+          ],
+          [
+            74.838626,
+            12.8531475
+          ],
+          [
+            74.838403,
+            12.8531199
+          ],
+          [
+            74.8378898,
+            12.8530267
+          ],
+          [
+            74.837821,
+            12.8530183
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "drain"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.837821,
+            12.8530183
+          ],
+          [
+            74.8377217,
+            12.8530431
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "drain"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8452616,
+            12.8555253
+          ],
+          [
+            74.8452185,
+            12.8554197
+          ],
+          [
+            74.8451381,
+            12.8553256
+          ],
+          [
+            74.8450818,
+            12.8553046
+          ],
+          [
+            74.8449557,
+            12.8552942
+          ],
+          [
+            74.8447894,
+            12.8552916
+          ],
+          [
+            74.844607,
+            12.8552184
+          ],
+          [
+            74.8444648,
+            12.8551477
+          ],
+          [
+            74.8443468,
+            12.8550771
+          ],
+          [
+            74.8441644,
+            12.8550379
+          ],
+          [
+            74.8440142,
+            12.8549595
+          ],
+          [
+            74.8438774,
+            12.8548967
+          ],
+          [
+            74.8438241,
+            12.8548662
+          ],
+          [
+            74.843776,
+            12.8548288
+          ],
+          [
+            74.8437495,
+            12.8547934
+          ],
+          [
+            74.8437433,
+            12.8547555
+          ],
+          [
+            74.8437298,
+            12.8547098
+          ],
+          [
+            74.8437084,
+            12.854658
+          ],
+          [
+            74.843679,
+            12.85463
+          ],
+          [
+            74.843636,
+            12.8546117
+          ],
+          [
+            74.8435556,
+            12.8545986
+          ],
+          [
+            74.8434537,
+            12.8545855
+          ],
+          [
+            74.8433169,
+            12.8545672
+          ],
+          [
+            74.8430008,
+            12.8544911
+          ],
+          [
+            74.842931,
+            12.8544804
+          ],
+          [
+            74.8428582,
+            12.8544652
+          ],
+          [
+            74.8427828,
+            12.8544233
+          ],
+          [
+            74.8427275,
+            12.8543738
+          ],
+          [
+            74.8425873,
+            12.8542299
+          ],
+          [
+            74.8424988,
+            12.8541436
+          ],
+          [
+            74.8422225,
+            12.8539972
+          ],
+          [
+            74.8421442,
+            12.8539844
+          ],
+          [
+            74.8420689,
+            12.8539927
+          ],
+          [
+            74.8419901,
+            12.8539977
+          ],
+          [
+            74.8419035,
+            12.8539967
+          ],
+          [
+            74.8418067,
+            12.8539727
+          ],
+          [
+            74.8417114,
+            12.8539531
+          ],
+          [
+            74.8415225,
+            12.8538899
+          ],
+          [
+            74.8414069,
+            12.8538534
+          ],
+          [
+            74.8412945,
+            12.8537958
+          ],
+          [
+            74.8411845,
+            12.8537375
+          ],
+          [
+            74.8410776,
+            12.8537122
+          ],
+          [
+            74.8409581,
+            12.8537114
+          ],
+          [
+            74.8409169,
+            12.8537002
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "drain"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8409169,
+            12.8537002
+          ],
+          [
+            74.840661,
+            12.8536133
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "drain"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8462485,
+            12.8567074
+          ],
+          [
+            74.8461493,
+            12.8565624
+          ],
+          [
+            74.8460527,
+            12.8564343
+          ],
+          [
+            74.8458194,
+            12.8562434
+          ],
+          [
+            74.8457255,
+            12.856063
+          ],
+          [
+            74.8456584,
+            12.8559375
+          ],
+          [
+            74.8456298,
+            12.8559147
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "drain"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8452923,
+            12.8556006
+          ],
+          [
+            74.8452616,
+            12.8555253
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "drain"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8453817,
+            12.8556816
+          ],
+          [
+            74.8453297,
+            12.8556442
+          ],
+          [
+            74.8452923,
+            12.8556006
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "drain"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8456298,
+            12.8559147
+          ],
+          [
+            74.8453817,
+            12.8556816
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "drain"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8583383,
+            12.8864746
+          ],
+          [
+            74.8582669,
+            12.8861037
+          ],
+          [
+            74.8584232,
+            12.8860982
+          ],
+          [
+            74.8584893,
+            12.8864584
+          ],
+          [
+            74.8583383,
+            12.8864746
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "water"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            74.8590781,
+            12.8524253
+          ],
+          [
+            74.8594563,
+            12.852288
+          ],
+          [
+            74.8596347,
+            12.8522422
+          ],
+          [
+            74.8597339,
+            12.8522271
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Waterway",
+        "type": "waterway",
+        "waterway_type": "ditch"
+      }
+    }
+  ],
+  "weather_metadata": {
+    "temp": 26.58,
+    "humidity": 86,
+    "wind_speed": 2.47,
+    "rain_1h": 0.0,
+    "description": "broken clouds"
+  },
+  "route_analysis": {
+    "cost_before": 124.88640000000004,
+    "cost_after": 137.38640000000004,
+    "time_increase_pct": 10.009096266687163
+  }
+}
