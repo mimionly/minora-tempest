@@ -72,7 +72,7 @@
 
             <!-- Telemetry Metrics Output -->
             <div id="metricsPanel" class="mt-4 border-t border-slate-200 pt-3 space-y-2 hidden">
-                <div class="grid grid-cols-2 gap-2 font-mono text-xs">
+                <div class="grid grid-cols-3 gap-2 font-mono text-xs">
                     <div class="bg-slate-50 p-2 border border-slate-200 rounded">
                         <span class="block text-[9px] text-slate-400 uppercase">Risk Tier</span>
                         <span id="metricTier" class="font-bold">--</span>
@@ -80,6 +80,10 @@
                     <div class="bg-slate-50 p-2 border border-slate-200 rounded">
                         <span class="block text-[9px] text-slate-400 uppercase">Score Matrix</span>
                         <span id="metricScore" class="font-bold">--</span>
+                    </div>
+                    <div class="bg-slate-50 p-2 border border-slate-200 rounded">
+                        <span class="block text-[9px] text-slate-400 uppercase">Latency</span>
+                        <span id="metricLatency" class="font-bold text-blue-600">--</span>
                     </div>
                 </div>
             </div>
@@ -188,6 +192,11 @@
         function computeSafeRoute() {
             if (!startMarker || !endMarker) return;
 
+            // Clear previous overlays immediately to prevent stale visual routes
+            routeLayerGroup.clearLayers();
+            submergedLayerGroup.clearLayers();
+            warningLayerGroup.clearLayers();
+
             const payload = {
                 city: document.getElementById("citySelect").value,
                 start: [startMarker.getLatLng().lat, startMarker.getLatLng().lng],
@@ -206,6 +215,7 @@
                     document.getElementById("metricsPanel").classList.remove("hidden");
                     document.getElementById("metricTier").innerText = data.risk_tier;
                     document.getElementById("metricScore").innerText = data.risk_score;
+                    document.getElementById("metricLatency").innerText = data.latency_ms + " ms";
 
                     const explanationBox = document.getElementById("explanationPanel");
                     const explanationTxt = document.getElementById("explanationText");
@@ -213,16 +223,10 @@
 
                     if (data.risk_score >= 50) {
                         explanationBox.className = "p-4 bg-rose-50 border border-rose-200 rounded-lg text-rose-900";
-                        explanationTxt.innerText = `⚠️ Avoided waterlogged zones. Red and amber risk extension maps have been overlaid onto your base platform.`;
                     } else {
                         explanationBox.className = "p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900";
-                        explanationTxt.innerText = `✓ Optimal evacuation trajectory determined. Standard network pathways hold baseline risk profiles.`;
                     }
-
-                    // Clear previous overlays within the Layer Groups
-                    routeLayerGroup.clearLayers();
-                    submergedLayerGroup.clearLayers();
-                    warningLayerGroup.clearLayers();
+                    explanationTxt.innerText = data.reasoning;
 
                     // 1. Plot the Submerged/Blocked Road Layer (Red Lines)
                     data.submerged_layers.forEach(geom => {
@@ -239,8 +243,14 @@
                     
                     map.fitBounds(mainRoute.getBounds(), { padding: [40, 40] });
                 } else {
+                    document.getElementById("metricsPanel").classList.add("hidden");
+                    document.getElementById("explanationPanel").classList.add("hidden");
                     alert("Routing Error: " + data.message);
                 }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Routing calculation failed due to network or server error.");
             });
         }
     </script>
