@@ -4,181 +4,264 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function ExploreScreen() {
   // We use a completely sandboxed iframe with Leaflet CDN.
   // This bypasses Metro bundler module resolution errors entirely and is extremely fast.
-  const mapHtml = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-      <style>
-        body { margin: 0; padding: 0; background: #020205; overflow: hidden; font-family: sans-serif; color: white; }
-        #map { width: 100vw; height: 100vh; background: #020205; }
-        
-        .overlay-panel {
-          position: absolute;
-          top: 20px;
-          right: 20px;
-          z-index: 1000;
-          background: rgba(10, 15, 30, 0.85);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(100, 150, 255, 0.2);
-          border-radius: 12px;
-          padding: 20px;
-          width: 320px;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .overlay-panel h3 { margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; color: #aaccff; }
-        .status-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
-        .status-label { color: #8899aa; }
-        .status-value { font-weight: bold; }
-        
-        .btn {
-          display: block;
-          width: 100%;
-          padding: 12px;
-          margin-top: 15px;
-          background: #0066ff;
-          color: white;
-          border: none;
-          border-radius: 6px;
-          font-weight: bold;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-        .btn:hover { background: #0055dd; }
-        
-        .pulse-warning { animation: pulseRed 2s infinite; }
-        @keyframes pulseRed {
-          0% { color: #ff3333; text-shadow: 0 0 5px rgba(255,51,51,0.5); }
-          50% { color: #ff9999; text-shadow: 0 0 20px rgba(255,51,51,1); }
-          100% { color: #ff3333; text-shadow: 0 0 5px rgba(255,51,51,0.5); }
-        }
-        
-        .pulse-safe { animation: pulseGreen 2s infinite; }
-        @keyframes pulseGreen {
-          0% { color: #00ffaa; text-shadow: 0 0 5px rgba(0,255,170,0.5); }
-          50% { color: #88ffcc; text-shadow: 0 0 20px rgba(0,255,170,1); }
-          100% { color: #00ffaa; text-shadow: 0 0 5px rgba(0,255,170,0.5); }
-        }
-        
-        /* Animations */
-        .dash-anim { animation: dash 20s linear infinite; }
-        @keyframes dash { to { stroke-dashoffset: -1000; } }
-        
-        .water-flow-anim { animation: waterFlow 3s linear infinite; filter: drop-shadow(0 0 5px #00aaff); }
-        @keyframes waterFlow { to { stroke-dashoffset: -100; } }
-        
-        /* Custom popup styling */
-        .leaflet-popup-content-wrapper { background: rgba(10, 10, 20, 0.9); color: white; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .leaflet-popup-tip { background: rgba(10, 10, 20, 0.9); }
-      </style>
-    </head>
-    <body>
-      <div id="map"></div>
-      
-      <div class="overlay-panel">
-        <h3>Emergency Routing Engine</h3>
-        <div class="status-row">
-          <span class="status-label">Target:</span>
-          <span class="status-value">Mumbai -> Pune</span>
-        </div>
-        <div class="status-row">
-          <span class="status-label">Environment:</span>
-          <span class="status-value pulse-warning" id="env-status">Flash Flood Detected</span>
-        </div>
-        <div class="status-row">
-          <span class="status-label">Original Route:</span>
-          <span class="status-value" style="color:#ff3333" id="orig-route">Submerged (Impassable)</span>
-        </div>
-        <div class="status-row" id="safe-route-row" style="display:none;">
-          <span class="status-label">Dynamic Route:</span>
-          <span class="status-value pulse-safe">Optimal (Bypassing Flood)</span>
-        </div>
-        
-        <button class="btn" id="recalc-btn" onclick="recalculateRoute()">Compute Safe Route</button>
-      </div>
+  const mapHtml = `<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50 text-slate-800">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Emergency Navigation Layer Extension</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="h-full flex flex-col font-sans antialiased">
 
-      <script>
-        const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([18.8, 73.3], 9);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm z-10">
+        <div class="flex items-center space-x-3">
+            <div class="h-3 w-3 rounded-full bg-blue-600 animate-pulse"></div>
+            <h1 class="text-xl font-bold tracking-tight text-slate-900">AERO-ROUTING // OVERLAY LAYER EXTENSION</h1>
+        </div>
+        <div id="gpsStatus" class="text-xs font-mono text-slate-500 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded">
+            EXTENSION TIER ACTIVE: MULTI-LAYER TOGGLE MODE
+        </div>
+    </header>
 
-        const createPin = (color) => L.divIcon({
-          html: \`<svg width="32" height="32" viewBox="0 0 24 24" fill="\${color}" stroke="#fff" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5" fill="#fff"/></svg>\`,
-          className: '', iconSize: [32, 32], iconAnchor: [16, 32]
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Sidebar Controls -->
+        <section class="w-96 bg-white border-r border-slate-200 p-6 flex flex-col justify-between overflow-y-auto shadow-sm z-10">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Target Area</label>
+                    <select id="citySelect" onchange="panMapToCity()" class="w-full bg-slate-50 border border-slate-300 rounded-md px-3 py-1.5 text-sm text-slate-800 focus:outline-none focus:border-blue-500">
+                        <option value="Mangaluru">Mangaluru Localities (Coastal Zone)</option>
+                        <option value="Patna">Patna Localities (Gangetic Basin)</option>
+                    </select>
+                </div>
+
+                <!-- Address Input Bars -->
+                <div class="bg-slate-50 p-3 border border-slate-200 rounded-lg space-y-2">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">Geographic Address Finder</h4>
+                    <div class="flex space-x-1">
+                        <input id="srcSearch" type="text" placeholder="Source location..." class="flex-1 bg-white border border-slate-300 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-blue-500">
+                        <button onclick="geocodeAddress('src')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 rounded font-medium">Find</button>
+                    </div>
+                    <div class="flex space-x-1">
+                        <input id="destSearch" type="text" placeholder="Destination location..." class="flex-1 bg-white border border-slate-300 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-blue-500">
+                        <button onclick="geocodeAddress('dest')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 rounded font-medium">Find</button>
+                    </div>
+                </div>
+
+                <!-- Simulation Barriers Tool -->
+                <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg space-y-1.5">
+                    <label class="block text-xs font-bold text-amber-900 uppercase tracking-wide">⚡ Simulation Injector (Dynamic Barriers)</label>
+                    <input id="customBlockInput" type="text" placeholder="Type street name to submerge..." class="w-full bg-white border border-amber-300 text-xs rounded-md px-2.5 py-1.5 focus:outline-none focus:border-amber-600 font-mono">
+                </div>
+
+                <div class="space-y-2">
+                    <button onclick="activateLiveTracking()" class="w-full bg-emerald-600 hover:bg-emerald-50 text-white text-xs font-semibold py-2 px-4 rounded-md">
+                        📍 Lock On Live Device GPS Coordinates
+                    </button>
+                    <button onclick="computeSafeRoute()" class="w-full bg-blue-600 hover:bg-blue-50 text-white text-sm font-semibold py-2.5 px-4 rounded-md shadow-md">
+                        Calculate Flood-Aware Route
+                    </button>
+                    <button onclick="clearMapLayers()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs py-1.5 rounded-md">
+                        Clear All Inputs
+                    </button>
+                </div>
+
+                <div id="explanationPanel" class="p-4 rounded-lg hidden text-xs leading-relaxed">
+                    <h3 class="font-bold uppercase tracking-wide mb-1">Route Evaluation Profile</h3>
+                    <p id="explanationText" class="font-medium">Standby...</p>
+                </div>
+            </div>
+
+            <!-- Telemetry Metrics Output -->
+            <div id="metricsPanel" class="mt-4 border-t border-slate-200 pt-3 space-y-2 hidden">
+                <div class="grid grid-cols-3 gap-2 font-mono text-xs">
+                    <div class="bg-slate-50 p-2 border border-slate-200 rounded">
+                        <span class="block text-[9px] text-slate-400 uppercase">Risk Tier</span>
+                        <span id="metricTier" class="font-bold">--</span>
+                    </div>
+                    <div class="bg-slate-50 p-2 border border-slate-200 rounded">
+                        <span class="block text-[9px] text-slate-400 uppercase">Score Matrix</span>
+                        <span id="metricScore" class="font-bold">--</span>
+                    </div>
+                    <div class="bg-slate-50 p-2 border border-slate-200 rounded">
+                        <span class="block text-[9px] text-slate-400 uppercase">Latency</span>
+                        <span id="metricLatency" class="font-bold text-blue-600">--</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Layer Workspace Area -->
+        <section class="flex-1 relative bg-slate-100">
+            <div id="map" class="absolute inset-0"></div>
+        </section>
+    </main>
+
+    <script>
+        const cityFocus = { "Mangaluru": [12.8701, 74.8800], "Patna": [25.5941, 85.1376] };
+        let map = L.map('map', { zoomControl: false }).setView(cityFocus["Mangaluru"], 14);
+        
+        // Base street layer tile template
+        let baseStreetLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 20 }).addTo(map);
+
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        let startMarker = null, endMarker = null;
+        
+        // Declare and allocate dedicated Layer Groups for map extensions controls toggle integration
+        let routeLayerGroup = L.layerGroup().addTo(map);
+        let submergedLayerGroup = L.layerGroup().addTo(map);
+        let warningLayerGroup = L.layerGroup().addTo(map);
+
+        // Map extension layer matrix definitions
+        let overlayExtensionMaps = {
+            "🚀 Evacuation Path": routeLayerGroup,
+            "🔴 Submerged Zones Layer": submergedLayerGroup,
+            "🟡 Vulnerable Networks Layer": warningLayerGroup
+        };
+
+        // Renders standard open-source overlay checkbox widgets on top right canvas zone
+        L.control.layers(null, overlayExtensionMaps, { position: 'topright', collapsed: false }).addTo(map);
+
+        let liveTrackingActive = false, watchId = null;
+
+        function panMapToCity() {
+            map.flyTo(cityFocus[document.getElementById("citySelect").value], 14);
+            clearMapLayers();
+        }
+
+        function clearMapLayers() {
+            if(startMarker) map.removeLayer(startMarker);
+            if(endMarker) map.removeLayer(endMarker);
+            routeLayerGroup.clearLayers();
+            submergedLayerGroup.clearLayers();
+            warningLayerGroup.clearLayers();
+            startMarker = null; endMarker = null;
+            document.getElementById("metricsPanel").classList.add("hidden");
+            document.getElementById("explanationPanel").classList.add("hidden");
+            document.getElementById("customBlockInput").value = "";
+            if (watchId) { navigator.geolocation.clearWatch(watchId); }
+            liveTrackingActive = false;
+        }
+
+        function geocodeAddress(type) {
+            const currentCity = document.getElementById("citySelect").value;
+            const queryRaw = document.getElementById(type === 'src' ? 'srcSearch' : 'destSearch').value;
+            if(!queryRaw) return;
+            
+            fetch(\`https://nominatim.openstreetmap.org/search?format=json&q=\${encodeURIComponent(queryRaw + ", " + currentCity)}\`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.length === 0) { alert("Address string target missed."); return; }
+                    const latlng = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+                    if(type === 'src') {
+                        if(startMarker) map.removeLayer(startMarker);
+                        startMarker = L.marker(latlng).addTo(map);
+                    } else {
+                        if(endMarker) map.removeLayer(endMarker);
+                        endMarker = L.marker(latlng).addTo(map);
+                    }
+                    map.panTo(latlng);
+                });
+        }
+
+        function activateLiveTracking() {
+            if (!navigator.geolocation) { alert("Hardware Geolocation missing."); return; }
+            liveTrackingActive = true;
+            watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const liveLatLng = [lat, lon];
+                    if (startMarker) { startMarker.setLatLng(liveLatLng); } 
+                    else { startMarker = L.marker(liveLatLng).addTo(map); }
+                    if (endMarker) { computeSafeRoute(); }
+                },
+                (err) => { console.error(err); },
+                { enableHighAccuracy: true }
+            );
+        }
+
+        map.on('click', function(e) {
+            if (liveTrackingActive) {
+                if (!endMarker) { endMarker = L.marker(e.latlng).addTo(map); computeSafeRoute(); }
+                return;
+            }
+            if (!startMarker) { startMarker = L.marker(e.latlng).addTo(map); } 
+            else if (!endMarker) { endMarker = L.marker(e.latlng).addTo(map); computeSafeRoute(); }
         });
 
-        // Mumbai and Pune coordinates (Lng, Lat for OSRM API)
-        const start = [72.8777, 19.0760];
-        const end = [73.8567, 18.5204];
-        const detour = [73.18, 18.65]; // Safe waypoint bypassing flood
+        function computeSafeRoute() {
+            if (!startMarker || !endMarker) return;
 
-        L.marker([start[1], start[0]], { icon: createPin('#0066ff') }).addTo(map).bindPopup('<b>Rescue Fleet HQ (Mumbai)</b>');
-        L.marker([end[1], end[0]], { icon: createPin('#00ffaa') }).addTo(map).bindPopup('<b>Target Zone (Pune)</b>');
+            // Clear previous overlays immediately to prevent stale visual routes
+            routeLayerGroup.clearLayers();
+            submergedLayerGroup.clearLayers();
+            warningLayerGroup.clearLayers();
 
-        let origLines = [], safeLine, floodMarker;
+            const payload = {
+                city: document.getElementById("citySelect").value,
+                start: [startMarker.getLatLng().lat, startMarker.getLatLng().lng],
+                end: [endMarker.getLatLng().lat, endMarker.getLatLng().lng],
+                custom_block: document.getElementById("customBlockInput").value
+            };
 
-        // Fetch Original Route from OpenStreetMap (OSRM)
-        fetch(\`https://router.project-osrm.org/route/v1/driving/\${start[0]},\${start[1]};\${end[0]},\${end[1]}?overview=full&geometries=geojson\`)
-          .then(res => res.json())
-          .then(data => {
-            const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-            
-            // Calculate indices for the flooded segment (from 35% to 65% of the route)
-            const len = coords.length;
-            const floodStart = Math.floor(len * 0.35);
-            const floodEnd = Math.floor(len * 0.65);
-            
-            const preFloodCoords = coords.slice(0, floodStart + 1);
-            const floodedCoords = coords.slice(floodStart, floodEnd + 1);
-            const postFloodCoords = coords.slice(floodEnd);
-            
-            // Draw normal impassable sections (muted red)
-            origLines.push(L.polyline(preFloodCoords, { color: '#ff3333', weight: 4, dashArray: '10, 15', className: 'dash-anim' }).addTo(map));
-            origLines.push(L.polyline(postFloodCoords, { color: '#ff3333', weight: 4, dashArray: '10, 15', className: 'dash-anim' }).addTo(map));
-            
-            // Draw flooded section (water flowing over the road)
-            origLines.push(L.polyline(floodedCoords, { color: '#002244', weight: 10 }).addTo(map)); // Deep water base
-            origLines.push(L.polyline(floodedCoords, { color: '#00aaff', weight: 6, dashArray: '15, 15', className: 'water-flow-anim' }).addTo(map)); // Flowing crests
-            
-            // Add a warning marker exactly at the center of the flooded road
-            const centerCoord = coords[Math.floor(len * 0.5)];
-            const warningIcon = L.divIcon({
-              html: \`<svg width="24" height="24" viewBox="0 0 24 24" fill="#ff3333" stroke="#fff" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>\`,
-              className: '', iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12]
-            });
-            floodMarker = L.marker(centerCoord, { icon: warningIcon })
-              .addTo(map)
-              .bindPopup('<b>SEVERE FLASH FLOOD</b><br/>Water depth: 1.5m<br/>Highway Submerged & Impassable')
-              .openPopup();
-          });
-
-        window.recalculateRoute = function() {
-          const btn = document.getElementById('recalc-btn');
-          btn.innerText = "Computing via OSM Engine...";
-          btn.style.background = "#aaaaaa";
-          
-          // Fetch Safe Route from OpenStreetMap (OSRM) bypassing the flood
-          fetch(\`https://router.project-osrm.org/route/v1/driving/\${start[0]},\${start[1]};\${detour[0]},\${detour[1]};\${end[0]},\${end[1]}?overview=full&geometries=geojson\`)
+            fetch('http://localhost:5000/api/route', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
             .then(res => res.json())
             .then(data => {
-              btn.style.display = "none";
-              document.getElementById('safe-route-row').style.display = "flex";
-              document.getElementById('orig-route').style.textDecoration = "line-through";
-              document.getElementById('orig-route').style.opacity = "0.5";
-              
-              const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-              safeLine = L.polyline(coords, {
-                color: '#00ffaa', weight: 5, className: 'dash-anim'
-              }).addTo(map);
-              
-              map.fitBounds(safeLine.getBounds(), { padding: [50, 50] });
+                if (data.status === "success") {
+                    document.getElementById("metricsPanel").classList.remove("hidden");
+                    document.getElementById("metricTier").innerText = data.risk_tier;
+                    document.getElementById("metricScore").innerText = data.risk_score;
+                    document.getElementById("metricLatency").innerText = data.latency_ms + " ms";
+
+                    const explanationBox = document.getElementById("explanationPanel");
+                    const explanationTxt = document.getElementById("explanationText");
+                    explanationBox.classList.remove("hidden");
+
+                    if (data.risk_score >= 50) {
+                        explanationBox.className = "p-4 bg-rose-50 border border-rose-200 rounded-lg text-rose-900";
+                    } else {
+                        explanationBox.className = "p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900";
+                    }
+                    explanationTxt.innerText = data.reasoning;
+
+                    // 1. Plot the Submerged/Blocked Road Layer (Red Lines)
+                    data.submerged_layers.forEach(geom => {
+                        L.polyline(geom, { color: '#ef4444', weight: 4, opacity: 0.7, dashArray: '5, 8' }).addTo(submergedLayerGroup);
+                    });
+
+                    // 2. Plot the Waterlogged Warning Road Layer (Amber Lines)
+                    data.warning_layers.forEach(geom => {
+                        L.polyline(geom, { color: '#f59e0b', weight: 4, opacity: 0.6 }).addTo(warningLayerGroup);
+                    });
+
+                    // 3. Plot the final dynamic Snapped Route Vector Corridor Layer (Solid High-Contrast Blue Line)
+                    let mainRoute = L.polyline(data.route, { color: '#2563eb', weight: 6, opacity: 0.95 }).addTo(routeLayerGroup);
+                    
+                    map.fitBounds(mainRoute.getBounds(), { padding: [40, 40] });
+                } else {
+                    document.getElementById("metricsPanel").classList.add("hidden");
+                    document.getElementById("explanationPanel").classList.add("hidden");
+                    alert("Routing Error: " + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Routing calculation failed due to network or server error.");
             });
-        };
-      </script>
-    </body>
-    </html>
-  `;
+        }
+    </script>
+</body>
+</html>`;
 
   return (
     <View style={styles.container}>
