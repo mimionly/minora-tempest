@@ -1,180 +1,139 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Platform, StyleSheet, View, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ExternalLink } from '@/components/external-link';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+export default function ExploreScreen() {
+  // We use a completely sandboxed iframe with Leaflet CDN.
+  // This bypasses Metro bundler module resolution errors entirely and is extremely fast.
+  const mapHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <style>
+        body { margin: 0; padding: 0; background: #020205; overflow: hidden; font-family: sans-serif; }
+        #map { width: 100vw; height: 100vh; background: #020205; }
+        
+        .map-animate-in {
+          animation: mapZoomIn 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+          opacity: 0;
+          transform: scale(1.1);
+        }
+        @keyframes mapZoomIn {
+          0% { opacity: 0; transform: scale(1.2); filter: blur(10px); }
+          100% { opacity: 1; transform: scale(1); filter: blur(0px); }
+        }
+        
+        /* Custom popup styling */
+        .leaflet-popup-content-wrapper {
+          background: rgba(10, 10, 20, 0.9);
+          color: white;
+          border-radius: 8px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .leaflet-popup-tip {
+          background: rgba(10, 10, 20, 0.9);
+        }
+      </style>
+    </head>
+    <body>
+      <div id="map" class="map-animate-in"></div>
+      <script>
+        // Initialize map centered on India
+        const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([20.5937, 78.9629], 5);
+        
+        // Dark mode minimal tiles
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
 
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
-  const theme = useTheme();
+        // SVG Icons
+        const createSvgIcon = (color) => L.divIcon({
+          html: \`<svg width="36" height="36" viewBox="0 0 24 24" fill="rgba(0,0,0,0.5)" stroke="\${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>\`,
+          className: '',
+          iconSize: [36, 36],
+          iconAnchor: [18, 36],
+          popupAnchor: [0, -36]
+        });
 
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
+        const redIcon = createSvgIcon('#ff3333');
+        const orangeIcon = createSvgIcon('#ffaa00');
+        const greenIcon = createSvgIcon('#00ffaa');
+
+        // Flash Flood Zone
+        L.marker([19.0760, 72.8777], { icon: redIcon })
+          .addTo(map).bindPopup('<b>Mumbai</b><br/>Severe Flash Flooding<br/>Routing: Disabled').openPopup();
+
+        // High Water Level
+        L.marker([22.5726, 88.3639], { icon: orangeIcon })
+          .addTo(map).bindPopup('<b>Kolkata</b><br/>High Water Level<br/>Routing: Restricted');
+
+        // Safe Zone
+        L.marker([28.7041, 77.1025], { icon: greenIcon })
+          .addTo(map).bindPopup('<b>Delhi</b><br/>Safe Zone<br/>Routing: Optimal');
+          
+        // Draw a routing path between Safe Zone and Flood Zone perimeter
+        const latlngs = [
+          [28.7041, 77.1025],
+          [26.2006, 78.1772],
+          [23.2599, 77.4126],
+          [20.5937, 75.9629]
+        ];
+        L.polyline(latlngs, { color: '#00ffaa', weight: 3, dashArray: '10, 10' }).addTo(map);
+      </script>
+    </body>
+    </html>
+  `;
 
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
-
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
-                />
-              </ThemedView>
-            </Pressable>
-          </ExternalLink>
-        </ThemedView>
-
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
-
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
-      </ThemedView>
-    </ScrollView>
+    <View style={styles.container}>
+      <SafeAreaView style={styles.header}>
+        <Text style={styles.headerTitle}>Live Flood Routing Engine</Text>
+        <Text style={styles.headerSubtitle}>Active region: South Asia / India</Text>
+      </SafeAreaView>
+      
+      {Platform.OS === 'web' ? (
+        <iframe
+          srcDoc={mapHtml}
+          style={{ width: '100%', height: '100%', border: 'none' }}
+          sandbox="allow-scripts allow-same-origin"
+        />
+      ) : (
+        <View style={styles.nativeFallback}>
+          <Text style={{ color: 'white' }}>Map view is only available on web.</Text>
+        </View>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
   container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
+    flex: 1,
+    backgroundColor: '#020205',
   },
-  titleContainer: {
-    gap: Spacing.three,
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
+  header: {
+    padding: 20,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    pointerEvents: 'none',
   },
-  centerText: {
-    textAlign: 'center',
+  headerTitle: {
+    color: '#ffffff',
+    fontSize: 28,
+    fontWeight: '900',
+    letterSpacing: -0.5,
   },
-  pressed: {
-    opacity: 0.7,
+  headerSubtitle: {
+    color: '#aaccff',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  linkButton: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
+  nativeFallback: {
+    flex: 1,
     justifyContent: 'center',
-    gap: Spacing.one,
     alignItems: 'center',
-  },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  collapsibleContent: {
-    alignItems: 'center',
-  },
-  imageTutorial: {
-    width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
-  },
+  }
 });

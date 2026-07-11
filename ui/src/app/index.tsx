@@ -1,5 +1,7 @@
-import { Platform, StyleSheet, View, Text } from 'react-native';
+import { Platform, StyleSheet, View, Text, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState } from 'react';
+import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -7,6 +9,16 @@ import { Globe } from '@/components/Globe';
 import Particles from '@/components/Particles';
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const [isZooming, setIsZooming] = useState(false);
+
+  const handleViewLive = () => {
+    setIsZooming(true);
+    setTimeout(() => {
+      router.push('/explore');
+    }, 2200); // 1.2s spin + 1.0s zoom
+  };
+
   return (
     <ThemedView style={styles.container}>
       {/* React Bits Particles Background */}
@@ -36,9 +48,9 @@ export default function HomeScreen() {
             </Text>
             
             <View style={styles.buttonGroup}>
-              <View style={styles.primaryButton}>
-                <Text style={styles.primaryButtonText}>View Live Demo</Text>
-              </View>
+              <Pressable onPress={handleViewLive} style={styles.primaryButton}>
+                <Text style={styles.primaryButtonText}>View Live</Text>
+              </Pressable>
               <View style={styles.secondaryButton}>
                 <Text style={styles.secondaryButtonText}>Download App</Text>
               </View>
@@ -46,7 +58,7 @@ export default function HomeScreen() {
           </View>
           <View style={styles.rightColumn}>
             <View style={styles.globeWrapper}>
-              <Globe />
+              <Globe isZooming={isZooming} />
             </View>
           </View>
         </View>
