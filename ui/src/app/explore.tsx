@@ -12,73 +12,165 @@ export default function ExploreScreen() {
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
       <style>
-        body { margin: 0; padding: 0; background: #020205; overflow: hidden; font-family: sans-serif; }
+        body { margin: 0; padding: 0; background: #020205; overflow: hidden; font-family: sans-serif; color: white; }
         #map { width: 100vw; height: 100vh; background: #020205; }
         
-        .map-animate-in {
-          animation: mapZoomIn 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-          opacity: 0;
-          transform: scale(1.1);
+        .overlay-panel {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          z-index: 1000;
+          background: rgba(10, 15, 30, 0.85);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(100, 150, 255, 0.2);
+          border-radius: 12px;
+          padding: 20px;
+          width: 320px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        @keyframes mapZoomIn {
-          0% { opacity: 0; transform: scale(1.2); filter: blur(10px); }
-          100% { opacity: 1; transform: scale(1); filter: blur(0px); }
+        .overlay-panel h3 { margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; color: #aaccff; }
+        .status-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .status-label { color: #8899aa; }
+        .status-value { font-weight: bold; }
+        
+        .btn {
+          display: block;
+          width: 100%;
+          padding: 12px;
+          margin-top: 15px;
+          background: #0066ff;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-weight: bold;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        .btn:hover { background: #0055dd; }
+        
+        .pulse-warning { animation: pulseRed 2s infinite; }
+        @keyframes pulseRed {
+          0% { color: #ff3333; text-shadow: 0 0 5px rgba(255,51,51,0.5); }
+          50% { color: #ff9999; text-shadow: 0 0 20px rgba(255,51,51,1); }
+          100% { color: #ff3333; text-shadow: 0 0 5px rgba(255,51,51,0.5); }
         }
         
+        .pulse-safe { animation: pulseGreen 2s infinite; }
+        @keyframes pulseGreen {
+          0% { color: #00ffaa; text-shadow: 0 0 5px rgba(0,255,170,0.5); }
+          50% { color: #88ffcc; text-shadow: 0 0 20px rgba(0,255,170,1); }
+          100% { color: #00ffaa; text-shadow: 0 0 5px rgba(0,255,170,0.5); }
+        }
+        
+        /* Animations */
+        .dash-anim { animation: dash 20s linear infinite; }
+        @keyframes dash { to { stroke-dashoffset: -1000; } }
+        
         /* Custom popup styling */
-        .leaflet-popup-content-wrapper {
-          background: rgba(10, 10, 20, 0.9);
-          color: white;
-          border-radius: 8px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .leaflet-popup-tip {
-          background: rgba(10, 10, 20, 0.9);
-        }
+        .leaflet-popup-content-wrapper { background: rgba(10, 10, 20, 0.9); color: white; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .leaflet-popup-tip { background: rgba(10, 10, 20, 0.9); }
       </style>
     </head>
     <body>
-      <div id="map" class="map-animate-in"></div>
-      <script>
-        // Initialize map centered on India
-        const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([20.5937, 78.9629], 5);
+      <div id="map"></div>
+      
+      <div class="overlay-panel">
+        <h3>Emergency Routing Engine</h3>
+        <div class="status-row">
+          <span class="status-label">Target:</span>
+          <span class="status-value">Mumbai -> Pune</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Environment:</span>
+          <span class="status-value pulse-warning" id="env-status">Flash Flood Detected</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Original Route:</span>
+          <span class="status-value" style="color:#ff3333" id="orig-route">Submerged (Impassable)</span>
+        </div>
+        <div class="status-row" id="safe-route-row" style="display:none;">
+          <span class="status-label">Dynamic Route:</span>
+          <span class="status-value pulse-safe">Optimal (Bypassing Flood)</span>
+        </div>
         
-        // Dark mode minimal tiles
+        <button class="btn" id="recalc-btn" onclick="recalculateRoute()">Compute Safe Route</button>
+      </div>
+
+      <script>
+        const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([18.8, 73.3], 9);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
 
-        // SVG Icons
-        const createSvgIcon = (color) => L.divIcon({
-          html: \`<svg width="36" height="36" viewBox="0 0 24 24" fill="rgba(0,0,0,0.5)" stroke="\${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>\`,
-          className: '',
-          iconSize: [36, 36],
-          iconAnchor: [18, 36],
-          popupAnchor: [0, -36]
+        // Custom Icons
+        const createPin = (color) => L.divIcon({
+          html: \`<svg width="32" height="32" viewBox="0 0 24 24" fill="\${color}" stroke="#fff" stroke-width="1.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5" fill="#fff"/></svg>\`,
+          className: '', iconSize: [32, 32], iconAnchor: [16, 32]
         });
 
-        const redIcon = createSvgIcon('#ff3333');
-        const orangeIcon = createSvgIcon('#ffaa00');
-        const greenIcon = createSvgIcon('#00ffaa');
+        // Start & End
+        L.marker([19.0760, 72.8777], { icon: createPin('#0066ff') }).addTo(map).bindPopup('<b>Rescue Fleet HQ (Mumbai)</b>');
+        L.marker([18.5204, 73.8567], { icon: createPin('#00ffaa') }).addTo(map).bindPopup('<b>Target Zone (Pune)</b>');
 
-        // Flash Flood Zone
-        L.marker([19.0760, 72.8777], { icon: redIcon })
-          .addTo(map).bindPopup('<b>Mumbai</b><br/>Severe Flash Flooding<br/>Routing: Disabled').openPopup();
+        // Flood Zone (Red Circle)
+        const floodZone = L.circle([18.75, 73.4], {
+          color: '#ff3333',
+          fillColor: '#ff3333',
+          fillOpacity: 0.4,
+          radius: 20000 // 20km
+        }).addTo(map);
+        
+        floodZone.bindPopup('<b>SEVERE FLASH FLOOD</b><br/>Water depth: 1.5m<br/>Impassable');
 
-        // High Water Level
-        L.marker([22.5726, 88.3639], { icon: orangeIcon })
-          .addTo(map).bindPopup('<b>Kolkata</b><br/>High Water Level<br/>Routing: Restricted');
-
-        // Safe Zone
-        L.marker([28.7041, 77.1025], { icon: greenIcon })
-          .addTo(map).bindPopup('<b>Delhi</b><br/>Safe Zone<br/>Routing: Optimal');
-          
-        // Draw a routing path between Safe Zone and Flood Zone perimeter
-        const latlngs = [
-          [28.7041, 77.1025],
-          [26.2006, 78.1772],
-          [23.2599, 77.4126],
-          [20.5937, 75.9629]
+        // Original Route (Straight-ish, passing through flood)
+        const origPath = [
+          [19.076, 72.877],
+          [18.989, 73.117],
+          [18.75, 73.4], // Lonavala (Flooded)
+          [18.65, 73.65],
+          [18.52, 73.85]
         ];
-        L.polyline(latlngs, { color: '#00ffaa', weight: 3, dashArray: '10, 10' }).addTo(map);
+        
+        const origLine = L.polyline(origPath, { 
+          color: '#ff3333', 
+          weight: 4, 
+          dashArray: '10, 15',
+          className: 'dash-anim'
+        }).addTo(map);
+
+        let safeLine;
+
+        window.recalculateRoute = function() {
+          const btn = document.getElementById('recalc-btn');
+          btn.innerText = "Computing in-memory...";
+          btn.style.background = "#aaaaaa";
+          
+          // Simulate <1s latency
+          setTimeout(() => {
+            btn.style.display = "none";
+            document.getElementById('safe-route-row').style.display = "flex";
+            document.getElementById('orig-route').style.textDecoration = "line-through";
+            document.getElementById('orig-route').style.opacity = "0.5";
+            
+            // Draw the safe route (Circumventing South)
+            const safePath = [
+              [19.076, 72.877],
+              [18.989, 73.117],
+              [18.73, 73.08], // Pen
+              [18.45, 73.20], // Further south
+              [18.40, 73.50], // East
+              [18.52, 73.85]  // Pune
+            ];
+            
+            safeLine = L.polyline(safePath, {
+              color: '#00ffaa',
+              weight: 5,
+              className: 'dash-anim'
+            }).addTo(map);
+            
+            // Fit bounds to show both
+            map.fitBounds(safeLine.getBounds(), { padding: [50, 50] });
+            
+          }, 600); // 600ms simulation of rapid recalculation
+        };
       </script>
     </body>
     </html>
