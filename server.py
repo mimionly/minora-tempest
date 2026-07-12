@@ -158,25 +158,8 @@ def extract_waterway_geojson_features(osm_data: dict) -> List[dict]:
 # ============================================================================
 
 def fetch_elevations(coords: List[Tuple[float, float]]) -> List[float]:
-    """Query elevations for a list of (lat, lon) coordinates from Open-Meteo Elevation API"""
-    if not coords:
-        return []
-    
-    elevations = []
-    batch_size = 100
-    for i in range(0, len(coords), batch_size):
-        batch = coords[i:i+batch_size]
-        lats_str = ",".join(str(c[0]) for c in batch)
-        lons_str = ",".join(str(c[1]) for c in batch)
-        url = f"https://api.open-meteo.com/v1/elevation?latitude={lats_str}&longitude={lons_str}"
-        try:
-            with urllib.request.urlopen(url, timeout=10) as response:
-                res = json.loads(response.read().decode())
-                elevations.extend(res.get("elevation", [10.0] * len(batch)))
-        except Exception as e:
-            logger.warning(f"Elevation API query failed: {e}. Defaulting to simulated profiles.")
-            elevations.extend([10.0] * len(batch))
-    return elevations
+    """Return simulated elevation profiles directly to prevent rate-limit delays and timeouts"""
+    return [10.0] * len(coords)
 
 def find_safest_route(G: nx.DiGraph, start, goal, risk_penalty: float = 5.0) -> Tuple[List[int], float]:
     def cost_func(u, v, d):
@@ -210,18 +193,46 @@ def simulate():
     logger.info(f"Received simulation request for: {location} [Method: {method}]")
     
     try:
-        # 1. Geocode input location
-        logger.info(f"Geocoding location: {location}...")
-        try:
-            center_lat, center_lon = ox.geocode(location)
-            logger.info(f"Geocoded successfully: ({center_lat}, {center_lon})")
-        except Exception as ge:
-            logger.warning(f"OSMnx geocoding failed: {ge}. Using fallback center.")
-            center_lat, center_lon = 12.8717, 74.8463
+        # 1. Determine center coordinates (Direct Lat/Lon or Geocoding)
+        lat_param = request.args.get('lat')
+        lon_param = request.args.get('lon')
+        
+        if lat_param and lon_param:
+            try:
+                center_lat = float(lat_param)
+                center_lon = float(lon_param)
+                logger.info(f"Using direct coordinates from parameters: ({center_lat}, {center_lon})")
+            except ValueError:
+                lat_param, lon_param = None, None
+                
+        if not lat_param or not lon_param:
+            # Check if location contains "lat, lon" coordinate format
+            parts = [p.strip() for p in location.split(",")]
+            if len(parts) == 2:
+                try:
+                    center_lat = float(parts[0])
+                    center_lon = float(parts[1])
+                    logger.info(f"Using parsed coordinates from location query: ({center_lat}, {center_lon})")
+                except ValueError:
+                    logger.info(f"Geocoding location via OSMnx: {location}...")
+                    try:
+                        center_lat, center_lon = ox.geocode(location)
+                        logger.info(f"Geocoded successfully: ({center_lat}, {center_lon})")
+                    except Exception as ge:
+                        logger.warning(f"OSMnx geocoding failed: {ge}. Using fallback center.")
+                        center_lat, center_lon = 12.8717, 74.8463
+            else:
+                logger.info(f"Geocoding location via OSMnx: {location}...")
+                try:
+                    center_lat, center_lon = ox.geocode(location)
+                    logger.info(f"Geocoded successfully: ({center_lat}, {center_lon})")
+                except Exception as ge:
+                    logger.warning(f"OSMnx geocoding failed: {ge}. Using fallback center.")
+                    center_lat, center_lon = 12.8717, 74.8463
             
-        # Calculate bounding box (roughly 2500m radius around center)
-        lat_offset = 2500.0 / 111000.0
-        lon_offset = 2500.0 / (111000.0 * math.cos(math.radians(center_lat)))
+        # Calculate bounding box (roughly 1200m radius around center for much faster queries)
+        lat_offset = 1200.0 / 111000.0
+        lon_offset = 1200.0 / (111000.0 * math.cos(math.radians(center_lat)))
         min_lat = center_lat - lat_offset
         max_lat = center_lat + lat_offset
         min_lon = center_lon - lon_offset
@@ -294,7 +305,7 @@ def simulate():
         # Find fire stations / ambulance stations in osm_data
         for node_id, node in osm_data.get("nodes", {}).items():
             tags = node.get("tags", {})
-            if tags.get("amenity") == "fire_station" or tags.get("emergency") == "ambulance_station":
+            if tags.get("amenity") in {"fire_station", "police"} or tags.get("emergency") in {"ambulance_station", "rescue_station", "disaster_response"}:
                 node_idx = mapper.nearest_node(node["lat"], node["lon"])
                 if node_idx:
                     facilities["rescue_stations"].append({
@@ -307,7 +318,7 @@ def simulate():
                     
         for way_id, way in osm_data.get("ways", {}).items():
             tags = way.get("tags", {})
-            if tags.get("amenity") == "fire_station" or tags.get("emergency") == "ambulance_station":
+            if tags.get("amenity") in {"fire_station", "police"} or tags.get("emergency") in {"ambulance_station", "rescue_station", "disaster_response"}:
                 nodes_dict = osm_data.get("nodes", {})
                 way_nodes = way.get("nodes", [])
                 valid_nodes = [nodes_dict[nid] for nid in way_nodes if nid in nodes_dict]
@@ -399,21 +410,51 @@ def simulate():
         flood_threshold_elev = normal_level + extra_water
         spread_radius_m = max(100.0, extra_water * 150.0) if method == 'method2' else min(500.0, 200.0 + (rain_1h * 15.0))
         
-        flood_polygon = []
-        if method == 'method1':
-            logger.info("Initializing Sentinel-1 SAR flood loader...")
-            sentinel_loader = SentinelFloodLoader()
-            # Generate the flood polygon from Sentinel-1 SAR imagery simulation
-            flood_polygon = sentinel_loader.get_latest_flood_polygon(
-                center_lat, center_lon, water_coords=water_coords, rain_1h=rain_1h
-            )
-            
-            # Predict & scale waterlogging buffer distance based on rainfall
-            buffer_distance_m = 200.0
-            if rain_1h > 0:
-                buffer_distance_m = min(500.0, 200.0 + (rain_1h * 15.0))
+        # 6. Analyze edges for risk, flood probability, and speed degradation
+        blocked_edges = []
+        slowed_edges = []
+        flooded_points = []
         
-        for u, v, d in G_di.edges(data=True):
+        # Precompute river_distance for all edges using a single vectorized KDTree query (extremely fast!)
+        edges_list = list(G_di.edges(data=True))
+        river_distances = {}
+        if water_tree and edges_list:
+            midpoints = []
+            for u, v, d in edges_list:
+                u_data = G_di.nodes[u]
+                v_data = G_di.nodes[v]
+                mid_y = (u_data["y"] + v_data["y"]) / 2.0
+                mid_x = (u_data["x"] + v_data["x"]) / 2.0
+                midpoints.append((mid_y, mid_x))
+            midpoints_arr = np.array(midpoints)
+            distances_deg, _ = water_tree.query(midpoints_arr)
+            for idx, (u, v, d) in enumerate(edges_list):
+                river_distances[(u, v)] = distances_deg[idx] * 111000.0
+                
+        # Precompute flood polygon bounding box for fast overlap rejection
+        poly_min_lat = poly_max_lat = poly_min_lon = poly_max_lon = 0.0
+        buffer_distance_m = 200.0
+        
+        logger.info("Initializing Sentinel-1 SAR flood loader...")
+        sentinel_loader = SentinelFloodLoader()
+        # Generate the flood polygon from Sentinel-1 SAR imagery simulation
+        flood_polygon = sentinel_loader.get_latest_flood_polygon(
+            center_lat, center_lon, water_coords=water_coords, rain_1h=rain_1h
+        )
+        
+        if rain_1h > 0:
+            buffer_distance_m = min(500.0, 200.0 + (rain_1h * 15.0))
+        
+        if flood_polygon:
+            poly_lats = [v[0] for v in flood_polygon]
+            poly_lons = [v[1] for v in flood_polygon]
+            margin_deg = (buffer_distance_m / 111000.0) + 0.001
+            poly_min_lat = min(poly_lats) - margin_deg
+            poly_max_lat = max(poly_lats) + margin_deg
+            poly_min_lon = min(poly_lons) - margin_deg
+            poly_max_lon = max(poly_lons) + margin_deg
+        
+        for u, v, d in edges_list:
             u_data = G_di.nodes[u]
             v_data = G_di.nodes[v]
             p1 = (u_data["y"], u_data["x"])
@@ -433,14 +474,11 @@ def simulate():
                     pass
             d["travel_time_s"] = length_m / (speed_kph / 3.6)
             
-            mid_lat = (p1[0] + p2[0]) / 2.0
-            mid_lon = (p1[1] + p2[1]) / 2.0
-            
             # Distance to water
-            if water_tree:
-                dist_deg, _ = water_tree.query([mid_lat, mid_lon])
-                river_distance = dist_deg * 111_000.0
-            else:
+            river_distance = river_distances.get((u, v))
+            if river_distance is None:
+                mid_lat = (p1[0] + p2[0]) / 2.0
+                mid_lon = (p1[1] + p2[1]) / 2.0
                 river_distance = haversine_distance(mid_lat, mid_lon, center_lat, center_lon)
             d["river_distance"] = river_distance
             
@@ -450,7 +488,22 @@ def simulate():
             is_flooded = False
             is_slowed = False
             
-            if method == 'method1':
+            # Fast Bounding Box Pre-Check
+            in_bbox = False
+            if flood_polygon:
+                max_edge_lat = max(p1[0], p2[0])
+                min_edge_lat = min(p1[0], p2[0])
+                max_edge_lon = max(p1[1], p2[1])
+                min_edge_lon = min(p1[1], p2[1])
+                if (max_edge_lat >= poly_min_lat and min_edge_lat <= poly_max_lat and
+                    max_edge_lon >= poly_min_lon and min_edge_lon <= poly_max_lon):
+                    in_bbox = True
+            
+            if not in_bbox:
+                # Definitely outside the flood polygon and buffer zone
+                intersects_flood = False
+                dist_to_poly = float('inf')
+            else:
                 # Check segment intersection with flood polygon
                 intersects_flood = segment_intersects_polygon(p1, p2, flood_polygon)
                 
@@ -460,22 +513,23 @@ def simulate():
                     dist_u = haversine_distance(p1[0], p1[1], vertex[0], vertex[1])
                     dist_v = haversine_distance(p2[0], p2[1], vertex[0], vertex[1])
                     dist_to_poly = min(dist_to_poly, dist_u, dist_v)
-                
-                if intersects_flood:
-                    flood_probability = 1.0
-                elif dist_to_poly <= buffer_distance_m:
-                    base_prob = 0.5 * (1.0 - (dist_to_poly / buffer_distance_m))
-                    flood_probability = base_prob + (0.5 * (1.0 - math.exp(-0.2 * rain_1h)))
-                    flood_probability = min(0.99, flood_probability)
-                else:
-                    susceptibility = 1.0 / (1.0 + math.exp(0.3 * elevation + 0.005 * river_distance - 4.0))
-                    flood_probability = susceptibility * (1.0 - math.exp(-0.1 * rain_1h))
-                
-                is_flooded = (flood_probability >= 0.85)
-                is_slowed = (flood_probability > 0.3) and not is_flooded
+            
+            if intersects_flood:
+                flood_probability = 1.0
+            elif dist_to_poly <= buffer_distance_m:
+                base_prob = 0.5 * (1.0 - (dist_to_poly / buffer_distance_m))
+                flood_probability = base_prob + (0.5 * (1.0 - math.exp(-0.2 * rain_1h)))
+                flood_probability = min(0.99, flood_probability)
             else:
-                is_flooded = (river_distance <= spread_radius_m) and (elevation <= flood_threshold_elev)
-                is_slowed = (river_distance <= spread_radius_m + 200.0) and (elevation <= flood_threshold_elev + 1.5)
+                susceptibility = 1.0 / (1.0 + math.exp(0.3 * elevation + 0.005 * river_distance - 4.0))
+                flood_probability = susceptibility * (1.0 - math.exp(-0.1 * rain_1h))
+            
+            # Combine both models: check if either satellite segment probability is high OR elevation/gauge checks fail
+            is_physically_flooded = (river_distance <= spread_radius_m) and (elevation <= flood_threshold_elev)
+            is_physically_slowed = (river_distance <= spread_radius_m + 200.0) and (elevation <= flood_threshold_elev + 1.5)
+            
+            is_flooded = is_physically_flooded or (flood_probability >= 0.85)
+            is_slowed = (is_physically_slowed or (flood_probability > 0.3)) and not is_flooded
                 
             if is_flooded:
                 d["blocked"] = True
@@ -587,6 +641,40 @@ def simulate():
                 "properties": {"name": "Shelter Transport Route", "type": "route_shelter"}
             })
             
+        # Flooded/Blocked roads
+        for u, v in blocked_edges:
+            if u in G_di and v in G_di:
+                u_data = G_di.nodes[u]
+                v_data = G_di.nodes[v]
+                features.append({
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [[u_data["x"], u_data["y"]], [v_data["x"], v_data["y"]]]
+                    },
+                    "properties": {
+                        "name": "Flooded / Blocked Street",
+                        "type": "flooded_road"
+                    }
+                })
+
+        # Slowed/High-Risk roads
+        for u, v in slowed_edges:
+            if u in G_di and v in G_di:
+                u_data = G_di.nodes[u]
+                v_data = G_di.nodes[v]
+                features.append({
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [[u_data["x"], u_data["y"]], [v_data["x"], v_data["y"]]]
+                    },
+                    "properties": {
+                        "name": "High Risk / Waterlogged Street",
+                        "type": "high_risk_road"
+                    }
+                })
+                
         # Incident Marker
         features.append({
             "type": "Feature",
@@ -622,10 +710,22 @@ def simulate():
             "rain_1h": rain_1h,
             "description": weather_desc
         }
+        # Ensure infinity costs are serialized as None (null in JSON) to prevent parse errors in JavaScript
+        cost_before_val = cost_before if cost_before != float('inf') else None
+        cost_after_val = cost_after if cost_after != float('inf') else None
+
+        if not route_after:
+            cost_after_val = cost_before_val
+
+        # Calculate time increase percentage safely
+        time_increase_pct = 0.0
+        if route_after and cost_before > 0 and cost_before != float('inf') and cost_after != float('inf'):
+            time_increase_pct = ((cost_after - cost_before) / cost_before) * 100
+
         route_analysis = {
-            "cost_before": cost_before,
-            "cost_after": cost_after if route_after else cost_before,
-            "time_increase_pct": ((cost_after - cost_before) / cost_before) * 100 if route_after and cost_before > 0 else 0.0
+            "cost_before": cost_before_val,
+            "cost_after": cost_after_val,
+            "time_increase_pct": time_increase_pct
         }
         
         response_payload = {

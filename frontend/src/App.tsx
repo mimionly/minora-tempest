@@ -37,6 +37,16 @@ function MapZoomTracker({ onZoomChange }: { onZoomChange: (zoom: number) => void
   return null;
 }
 
+// Component to dynamically handle map click events
+function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lon: number) => void }) {
+  useMapEvents({
+    click(e) {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
+
 function App() {
   const [geoJsonData, setGeoJsonData] = useState<any>(null);
   const [weather, setWeather] = useState<any>(null);
@@ -51,13 +61,23 @@ function App() {
   const [normalLevel, setNormalLevel] = useState<number>(5.0);
   const [rain1h, setRain1h] = useState<number>(12.5);
   const [lastFetchedLocation, setLastFetchedLocation] = useState<string>('');
+  const [clickedCoords, setClickedCoords] = useState<{ lat: number; lon: number } | null>(null);
+
+  const handleMapClick = (lat: number, lon: number) => {
+    setClickedCoords({ lat, lon });
+    const coordString = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+    setLocationInput(coordString);
+    setLocation(coordString);
+  };
 
   const fetchMapData = (
     method: 'method1' | 'method2',
     activeLocation: string,
     curLevel?: number,
     normLevel?: number,
-    rain?: number
+    rain?: number,
+    clickedLat?: number,
+    clickedLon?: number
   ) => {
     setLoading(true);
     setError(null);
@@ -73,6 +93,12 @@ function App() {
       normal_level: finalNormLevel.toString(),
       rain_1h: finalRain.toString()
     });
+    
+    if (clickedLat !== undefined && clickedLon !== undefined) {
+      params.append('lat', clickedLat.toString());
+      params.append('lon', clickedLon.toString());
+    }
+
     fetch(`http://localhost:8000/api/simulate?${params.toString()}`)
       .then((res) => {
         if (!res.ok) {
@@ -105,10 +131,18 @@ function App() {
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      fetchMapData(selectedMethod, location, currentLevel, normalLevel, rain1h);
+      fetchMapData(
+        selectedMethod,
+        location,
+        currentLevel,
+        normalLevel,
+        rain1h,
+        clickedCoords?.lat,
+        clickedCoords?.lon
+      );
     }, 500);
     return () => clearTimeout(delayDebounce);
-  }, [selectedMethod, location, currentLevel, normalLevel, rain1h]);
+  }, [selectedMethod, location, currentLevel, normalLevel, rain1h, clickedCoords]);
 
   // Filter out line/polygon features for standard GeoJSON rendering
   const lineAndPolygonFeatures = geoJsonData
@@ -143,7 +177,7 @@ function App() {
         };
       case 'route_after':
         return {
-          color: '#3b82f6', // Bright neon blue for recalculated detour route
+          color: '#ef4444', // Red for high-priority recalculated detour route
           weight: 6,
           opacity: 0.9,
           dashArray: '8, 8',
@@ -156,9 +190,21 @@ function App() {
         };
       case 'waterway':
         return {
-          color: '#06b6d4', // Vibrant Cyan/Teal for waterways
-          weight: 3.5,
+          color: '#0284c7', // Vibrant Deep Blue for waterways
+          weight: 5.0,
+          opacity: 0.9,
+        };
+      case 'flooded_road':
+        return {
+          color: '#f97316', // Orange for blocked roads
+          weight: 4.5,
           opacity: 0.85,
+        };
+      case 'high_risk_road':
+        return {
+          color: '#eab308', // Yellow for high risk waterlogged roads
+          weight: 4.0,
+          opacity: 0.8,
         };
       default:
         return {
@@ -197,7 +243,10 @@ function App() {
               />
               <button
                 className="location-btn"
-                onClick={() => setLocation(locationInput)}
+                onClick={() => {
+                  setClickedCoords(null);
+                  setLocation(locationInput);
+                }}
                 disabled={loading || !locationInput.trim()}
               >
                 {loading ? 'Simulating...' : 'Run Simulation'}
@@ -238,124 +287,91 @@ function App() {
             )}
           </div>
 
-          {/* Flood Ingestion Model Selector */}
+          {/* Rainfall Simulator Widget */}
           <div className="widget">
             <div className="widget-title">
-              <span>📡</span> Flood Ingestion Model
+              <span>🌧️</span> Rainfall Simulation
             </div>
-            <div className="method-selector">
-              <button 
-                className={`method-card ${selectedMethod === 'method1' ? 'active' : ''}`}
-                onClick={() => setSelectedMethod('method1')}
-              >
-                <div className="method-icon">🛰️</div>
-                <div className="method-info">
-                  <div className="method-name">Method 1: Satellite SAR</div>
-                  <div className="method-desc">Sentinel-1 Radar Imagery</div>
-                </div>
-              </button>
-              <button 
-                className={`method-card ${selectedMethod === 'method2' ? 'active' : ''}`}
-                onClick={() => setSelectedMethod('method2')}
-              >
-                <div className="method-icon">🌊</div>
-                <div className="method-info">
-                  <div className="method-name">Method 2: River Gauge + DEM</div>
-                  <div className="method-desc">Gauge surge & elevation mapping</div>
-                </div>
-              </button>
+            <div className="slider-group">
+              <div className="slider-header">
+                <span className="slider-label">Precipitation Rate</span>
+                <span className="slider-val">{rain1h.toFixed(1)} mm/h</span>
+              </div>
+              <input
+                type="range"
+                className="slider-input"
+                min="0.0"
+                max="50.0"
+                step="0.5"
+                value={rain1h}
+                onChange={(e) => setRain1h(parseFloat(e.target.value))}
+              />
+            </div>
+            <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '8px', fontStyle: 'italic' }}>
+              Higher rainfall expands waterlogging buffer zones in satellite SAR imaging.
             </div>
           </div>
 
-          {/* Rainfall Simulator Widget (Method 1 only) */}
-          {selectedMethod === 'method1' && (
-            <div className="widget">
-              <div className="widget-title">
-                <span>🌧️</span> Rainfall Simulation
+          {/* River Gauge Level Widget */}
+          <div className="widget gauge-widget">
+            <div className="widget-title">
+              <span>📊</span> River Gauge Analytics
+            </div>
+            <div className="gauge-stats">
+              <div className="gauge-row">
+                <span className="gauge-label">Current River Level</span>
+                <span className="gauge-val danger">{currentLevel.toFixed(1)} m</span>
               </div>
-              <div className="slider-group">
-                <div className="slider-header">
-                  <span className="slider-label">Precipitation Rate</span>
-                  <span className="slider-val">{rain1h.toFixed(1)} mm/h</span>
-                </div>
-                <input
-                  type="range"
-                  className="slider-input"
-                  min="0.0"
-                  max="50.0"
-                  step="0.5"
-                  value={rain1h}
-                  onChange={(e) => setRain1h(parseFloat(e.target.value))}
-                />
+              <div className="gauge-row">
+                <span className="gauge-label">Normal Baseline Level</span>
+                <span className="gauge-val secondary">{normalLevel.toFixed(1)} m</span>
               </div>
-              <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '8px', fontStyle: 'italic' }}>
-                Higher rainfall expands waterlogging buffer zones in satellite SAR imaging.
+              <div className="gauge-divider" />
+              <div className="gauge-row highlight">
+                <span className="gauge-label">Active Water Surge</span>
+                <span className={`gauge-val ${currentLevel > normalLevel ? 'warning' : 'secondary'}`}>
+                  {currentLevel > normalLevel ? '+' : ''}{(currentLevel - normalLevel).toFixed(1)} m
+                </span>
               </div>
             </div>
-          )}
 
-          {/* River Gauge Level Widget (Method 2 only) */}
-          {selectedMethod === 'method2' && (
-            <div className="widget gauge-widget">
-              <div className="widget-title">
-                <span>📊</span> River Gauge Analytics
+            {/* Interactive sliders for River level parameters */}
+            <div className="slider-group" style={{ marginTop: '16px' }}>
+              <div className="slider-header">
+                <span className="slider-label">Simulated Current Level</span>
+                <span className="slider-val">{currentLevel.toFixed(1)} m</span>
               </div>
-              <div className="gauge-stats">
-                <div className="gauge-row">
-                  <span className="gauge-label">Current River Level</span>
-                  <span className="gauge-val danger">{currentLevel.toFixed(1)} m</span>
-                </div>
-                <div className="gauge-row">
-                  <span className="gauge-label">Normal Baseline Level</span>
-                  <span className="gauge-val secondary">{normalLevel.toFixed(1)} m</span>
-                </div>
-                <div className="gauge-divider" />
-                <div className="gauge-row highlight">
-                  <span className="gauge-label">Active Water Surge</span>
-                  <span className={`gauge-val ${currentLevel > normalLevel ? 'warning' : 'secondary'}`}>
-                    {currentLevel > normalLevel ? '+' : ''}{(currentLevel - normalLevel).toFixed(1)} m
-                  </span>
-                </div>
-              </div>
-
-              {/* Interactive sliders for Method 2 parameters */}
-              <div className="slider-group" style={{ marginTop: '16px' }}>
-                <div className="slider-header">
-                  <span className="slider-label">Simulated Current Level</span>
-                  <span className="slider-val">{currentLevel.toFixed(1)} m</span>
-                </div>
-                <input
-                  type="range"
-                  className="slider-input"
-                  min="0.0"
-                  max="15.0"
-                  step="0.1"
-                  value={currentLevel}
-                  onChange={(e) => setCurrentLevel(parseFloat(e.target.value))}
-                />
-              </div>
-
-              <div className="slider-group" style={{ marginTop: '12px' }}>
-                <div className="slider-header">
-                  <span className="slider-label">Simulated Baseline Level</span>
-                  <span className="slider-val">{normalLevel.toFixed(1)} m</span>
-                </div>
-                <input
-                  type="range"
-                  className="slider-input"
-                  min="0.0"
-                  max="10.0"
-                  step="0.1"
-                  value={normalLevel}
-                  onChange={(e) => setNormalLevel(parseFloat(e.target.value))}
-                />
-              </div>
-
-              <div className="gauge-footer-note" style={{ marginTop: '12px' }}>
-                DEM spreads surge water across regions under {currentLevel.toFixed(1)}m elevation.
-              </div>
+              <input
+                type="range"
+                className="slider-input"
+                min="0.0"
+                max="15.0"
+                step="0.1"
+                value={currentLevel}
+                onChange={(e) => setCurrentLevel(parseFloat(e.target.value))}
+              />
             </div>
-          )}
+
+            <div className="slider-group" style={{ marginTop: '12px' }}>
+              <div className="slider-header">
+                <span className="slider-label">Simulated Baseline Level</span>
+                <span className="slider-val">{normalLevel.toFixed(1)} m</span>
+              </div>
+              <input
+                type="range"
+                className="slider-input"
+                min="0.0"
+                max="10.0"
+                step="0.1"
+                value={normalLevel}
+                onChange={(e) => setNormalLevel(parseFloat(e.target.value))}
+              />
+            </div>
+
+            <div className="gauge-footer-note" style={{ marginTop: '12px' }}>
+              DEM spreads surge water across regions under {currentLevel.toFixed(1)}m elevation.
+            </div>
+          </div>
 
           {/* Live Weather Widget */}
           {weather && (
@@ -396,13 +412,13 @@ function App() {
               <div className="metrics-row">
                 <span>Normal Est. Time:</span>
                 <span className="metric-highlight" style={{ color: 'var(--success-color)' }}>
-                  {(routeStats.cost_before / 60).toFixed(1)} mins
+                  {routeStats.cost_before != null ? `${(routeStats.cost_before / 60).toFixed(1)} mins` : 'N/A'}
                 </span>
               </div>
               <div className="metrics-row">
                 <span>Detour Est. Time:</span>
                 <span className="metric-highlight" style={{ color: routeStats.time_increase_pct > 0 ? 'var(--warning-color)' : 'var(--accent-color)' }}>
-                  {(routeStats.cost_after / 60).toFixed(1)} mins
+                  {routeStats.cost_after != null ? `${(routeStats.cost_after / 60).toFixed(1)} mins` : 'N/A'}
                 </span>
               </div>
               <div className="metrics-row">
@@ -413,7 +429,7 @@ function App() {
                     color: routeStats.time_increase_pct > 0 ? 'var(--danger-color)' : 'var(--success-color)',
                   }}
                 >
-                  +{routeStats.time_increase_pct?.toFixed(1)}%
+                  {routeStats.cost_before != null && routeStats.cost_after != null ? `+${routeStats.time_increase_pct?.toFixed(1)}%` : 'N/A'}
                 </span>
               </div>
             </div>
@@ -433,12 +449,12 @@ function App() {
                 <div
                   className="legend-color-line"
                   style={{
-                    borderTop: '3px dashed #3b82f6',
+                    borderTop: '3px dashed #ef4444',
                     height: 0,
                     width: '32px',
                   }}
                 />
-                <span>Active Detour Route</span>
+                <span>Active Detour Route (High Priority)</span>
               </div>
               <div className="legend-item">
                 <div className="legend-color-line" style={{ backgroundColor: '#8b5cf6' }} />
@@ -455,8 +471,16 @@ function App() {
                 <span>Active Flood Polygon</span>
               </div>
               <div className="legend-item">
-                <div className="legend-color-line" style={{ backgroundColor: '#06b6d4' }} />
+                <div className="legend-color-line" style={{ backgroundColor: '#0284c7' }} />
                 <span>OSM Waterway (Riverbed)</span>
+              </div>
+              <div className="legend-item">
+                <div className="legend-color-line" style={{ backgroundColor: '#f97316' }} />
+                <span>Flooded / Blocked Street</span>
+              </div>
+              <div className="legend-item">
+                <div className="legend-color-line" style={{ backgroundColor: '#eab308' }} />
+                <span>High Risk / Waterlogged Street</span>
               </div>
             </div>
           </div>
@@ -474,10 +498,11 @@ function App() {
       {/* Leaflet Map Area */}
       <MapContainer center={[12.8717, 74.8463]} zoom={13} zoomControl={false} scrollWheelZoom={true}>
         <MapZoomTracker onZoomChange={setZoomLevel} />
-        {/* Dark-theme Map Tiles */}
+        <MapClickHandler onMapClick={handleMapClick} />
+        {/* Light-theme Map Tiles */}
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
 
         {/* Vector Line and Polygon Features */}

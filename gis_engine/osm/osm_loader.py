@@ -65,11 +65,24 @@ class OSMLoader:
         filters: Optional[list] = None,
     ) -> dict:
         """
-        Download OSM data for a bounding box via the Overpass API.
+        Download OSM data for a bounding box via the Overpass API, with local disk caching.
         """
         import urllib.request
         import json
         
+        # Create a cache key by rounding coordinates to 3 decimal places (~110m precision grid)
+        cache_key = f"{round(min_lat, 3)}_{round(min_lon, 3)}_{round(max_lat, 3)}_{round(max_lon, 3)}"
+        cache_filename = os.path.join(self.cache_dir, f"bbox_{cache_key}.json")
+        
+        if os.path.exists(cache_filename):
+            logger.info(f"Loading OSM data from local disk cache for BBOX: {cache_key}...")
+            try:
+                with open(cache_filename, "r", encoding="utf-8") as f:
+                    cached_data = json.load(f)
+                    return self._parse_overpass_json(cached_data)
+            except Exception as ce:
+                logger.warning(f"Failed to read OSM cache file: {ce}. Falling back to network...")
+
         logger.info(f"Fetching real OSM data for BBOX: {min_lat},{min_lon},{max_lat},{max_lon}...")
         
         # Overpass QL query to get nodes and ways for highways, hospitals, shelters, rescue stations, and waterways
@@ -77,12 +90,14 @@ class OSMLoader:
         [out:json][timeout:25];
         (
           way["highway"]({min_lat},{min_lon},{max_lat},{max_lon});
-          node["amenity"~"hospital|clinic|shelter|community_centre|school|fire_station"]({min_lat},{min_lon},{max_lat},{max_lon});
-          way["amenity"~"hospital|clinic|shelter|community_centre|school|fire_station"]({min_lat},{min_lon},{max_lat},{max_lon});
+          node["amenity"~"hospital|clinic|shelter|community_centre|school|fire_station|police|townhall|place_of_worship|sports_centre"]({min_lat},{min_lon},{max_lat},{max_lon});
+          way["amenity"~"hospital|clinic|shelter|community_centre|school|fire_station|police|townhall|place_of_worship|sports_centre"]({min_lat},{min_lon},{max_lat},{max_lon});
           node["healthcare"]({min_lat},{min_lon},{max_lat},{max_lon});
           way["healthcare"]({min_lat},{min_lon},{max_lat},{max_lon});
-          node["emergency"~"ambulance_station"]({min_lat},{min_lon},{max_lat},{max_lon});
-          way["emergency"~"ambulance_station"]({min_lat},{min_lon},{max_lat},{max_lon});
+          node["emergency"~"ambulance_station|rescue_station|disaster_response"]({min_lat},{min_lon},{max_lat},{max_lon});
+          way["emergency"~"ambulance_station|rescue_station|disaster_response"]({min_lat},{min_lon},{max_lat},{max_lon});
+          node["leisure"="sports_centre"]({min_lat},{min_lon},{max_lat},{max_lon});
+          way["leisure"="sports_centre"]({min_lat},{min_lon},{max_lat},{max_lon});
           way["waterway"]({min_lat},{min_lon},{max_lat},{max_lon});
           way["natural"="water"]({min_lat},{min_lon},{max_lat},{max_lon});
         );
@@ -98,7 +113,6 @@ class OSMLoader:
             "https://overpass.kumi.systems/api/interpreter"
         ]
         
-
         data = None
         for url in endpoints:
             logger.info(f"Connecting to Overpass API at {url}...")
@@ -108,6 +122,14 @@ class OSMLoader:
                 with urllib.request.urlopen(req, timeout=20) as response:
                     data = json.loads(response.read().decode('utf-8'))
                     logger.info("Successfully fetched data from Overpass API.")
+                    
+                    # Write fetched data to local cache
+                    try:
+                        with open(cache_filename, "w", encoding="utf-8") as f:
+                            json.dump(data, f, indent=2)
+                        logger.info(f"Saved OSM data to local disk cache: {cache_filename}")
+                    except Exception as we:
+                        logger.warning(f"Failed to write to OSM cache file: {we}")
                     break
             except Exception as e:
                 logger.warning(f"Failed to fetch from Overpass endpoint {url}: {e}")

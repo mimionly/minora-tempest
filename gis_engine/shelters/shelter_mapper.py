@@ -23,6 +23,10 @@ SHELTER_TAG_PATTERNS = [
     {"emergency": "assembly_point"},
     {"amenity": "community_centre"},   # often used as disaster shelters
     {"amenity": "school"},             # secondary: schools as surge shelters
+    {"amenity": "townhall"},           # town halls / civic halls
+    {"amenity": "place_of_worship"},   # churches, mosques, temples (excellent fallback shelters)
+    {"amenity": "sports_centre"},      # stadiums and sports halls
+    {"leisure": "sports_centre"},
 ]
 
 
@@ -129,7 +133,7 @@ class ShelterMapper:
             return None
         for pattern in SHELTER_TAG_PATTERNS:
             if all(tags.get(k) == v for k, v in pattern.items()):
-                return pattern.get("amenity") or pattern.get("social_facility") or "shelter"
+                return pattern.get("amenity") or pattern.get("social_facility") or pattern.get("leisure") or "shelter"
         return None
 
     def _snap_to_graph(self, shelters: list[dict]) -> list[dict]:
