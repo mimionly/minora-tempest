@@ -4,7 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function ExploreScreen() {
   // We use a completely sandboxed iframe with Leaflet CDN.
   // This bypasses Metro bundler module resolution errors entirely and is extremely fast.
-  const mapHtml = `<!DOCTYPE html>
+  const mapHtml = `
+<!DOCTYPE html>
 <html lang="en" class="h-full bg-slate-50 text-slate-800">
 <head>
     <meta charset="UTF-8">
@@ -75,6 +76,47 @@ export default function ExploreScreen() {
                     <p id="explanationText" class="font-medium">Standby...</p>
                 </div>
             </div>
+
+            
+                <!-- Multi-Modal Distance & Time Cards Matrix -->
+                <div id="travelTimeCard" class="bg-slate-900 text-white p-4 rounded-xl shadow-md space-y-3 hidden mt-4">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Estimated Travel Times</h4>
+                        <span id="routeDistance" class="bg-blue-600 text-white font-mono font-bold text-xs px-2.5 py-0.5 rounded-full">0.0 km</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div class="bg-slate-800 p-2 rounded flex justify-between items-center">
+                            <span class="text-slate-400">🚶 Walking</span>
+                            <span id="timeWalking" class="font-mono font-bold">-- mins</span>
+                        </div>
+                        <div class="bg-slate-800 p-2 rounded flex justify-between items-center">
+                            <span class="text-slate-400">🚲 Bike</span>
+                            <span id="timeBike" class="font-mono font-bold">-- mins</span>
+                        </div>
+                        <div class="bg-slate-800 p-2 rounded flex justify-between items-center">
+                            <span class="text-slate-400">🚗 Car</span>
+                            <span id="timeCar" class="font-mono font-bold">-- mins</span>
+                        </div>
+                        <div class="bg-slate-800 p-2 rounded flex justify-between items-center">
+                            <span class="text-slate-400">🚌 Bus</span>
+                            <span id="timeBus" class="font-mono font-bold">-- mins</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weather/Atmospheric Radar Card -->
+                <div id="weatherCard" class="bg-indigo-900 text-white p-4 rounded-xl shadow-md space-y-2 hidden mt-4">
+                    <div class="flex items-center justify-between border-b border-indigo-800 pb-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-300">🌩️ Atmospheric Radar</h4>
+                    </div>
+                    <div class="flex justify-between items-end pt-1">
+                        <span id="weatherDesc" class="text-sm font-medium text-indigo-100 capitalize">--</span>
+                        <div class="text-right">
+                            <span id="weatherTemp" class="block text-2xl font-bold font-mono">--°C</span>
+                            <span id="weatherWind" class="block text-xs text-indigo-300">-- km/h</span>
+                        </div>
+                    </div>
+                </div>
 
             <!-- Telemetry Metrics Output -->
             <div id="metricsPanel" class="mt-4 border-t border-slate-200 pt-3 space-y-2 hidden">
@@ -218,6 +260,19 @@ export default function ExploreScreen() {
             .then(res => res.json())
             .then(data => {
                 if (data.status === "success") {
+                    
+                    document.getElementById("weatherCard").classList.remove("hidden");
+                    document.getElementById("weatherDesc").innerText = data.weather.description;
+                    document.getElementById("weatherTemp").innerText = Math.round(data.weather.temperature) + "°C";
+                    document.getElementById("weatherWind").innerText = data.weather.windspeed + " km/h";
+
+                    document.getElementById("travelTimeCard").classList.remove("hidden");
+                    document.getElementById("routeDistance").innerText = data.distance_km + " km";
+                    document.getElementById("timeWalking").innerText = data.travel_times.walking + " mins";
+                    document.getElementById("timeBike").innerText = data.travel_times.bike + " mins";
+                    document.getElementById("timeCar").innerText = data.travel_times.car + " mins";
+                    document.getElementById("timeBus").innerText = data.travel_times.bus + " mins";
+
                     document.getElementById("metricsPanel").classList.remove("hidden");
                     document.getElementById("metricTier").innerText = data.risk_tier;
                     document.getElementById("metricScore").innerText = data.risk_score;
@@ -261,14 +316,12 @@ export default function ExploreScreen() {
         }
     </script>
 </body>
+</html>
 </html>`;
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.header}>
-        <Text style={styles.headerTitle}>Live Flood Routing Engine</Text>
-        <Text style={styles.headerSubtitle}>Active region: South Asia / India</Text>
-      </SafeAreaView>
+
       
       {Platform.OS === 'web' ? (
         <iframe
