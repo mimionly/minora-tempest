@@ -8,8 +8,10 @@ import pandas as pd
 import numpy as np
 import heapq
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # Enforce strict global in-memory caching layers
 ox.settings.use_cache = True

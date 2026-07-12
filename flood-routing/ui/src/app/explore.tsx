@@ -1,180 +1,371 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Platform, StyleSheet, View, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ExternalLink } from '@/components/external-link';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+export default function ExploreScreen() {
+  // We use a completely sandboxed iframe with Leaflet CDN.
+  // This bypasses Metro bundler module resolution errors entirely and is extremely fast.
+  const mapHtml = `
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50 text-slate-800">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Emergency Navigation Layer Extension</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="h-full flex flex-col font-sans antialiased">
 
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
-  const theme = useTheme();
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm z-10">
+        <div class="flex items-center space-x-3">
+            <div class="h-3 w-3 rounded-full bg-blue-600 animate-pulse"></div>
+            <h1 class="text-xl font-bold tracking-tight text-slate-900">AERO-ROUTING // OVERLAY LAYER EXTENSION</h1>
+        </div>
+        <div id="gpsStatus" class="text-xs font-mono text-slate-500 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded">
+            EXTENSION TIER ACTIVE: MULTI-LAYER TOGGLE MODE
+        </div>
+    </header>
 
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Sidebar Controls -->
+        <section class="w-96 bg-white border-r border-slate-200 p-6 flex flex-col justify-between overflow-y-auto shadow-sm z-10">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Target Area</label>
+                    <select id="citySelect" onchange="panMapToCity()" class="w-full bg-slate-50 border border-slate-300 rounded-md px-3 py-1.5 text-sm text-slate-800 focus:outline-none focus:border-blue-500">
+                        <option value="Mangaluru">Mangaluru Localities (Coastal Zone)</option>
+                        <option value="Patna">Patna Localities (Gangetic Basin)</option>
+                    </select>
+                </div>
+
+                <!-- Address Input Bars -->
+                <div class="bg-slate-50 p-3 border border-slate-200 rounded-lg space-y-2">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">Geographic Address Finder</h4>
+                    <div class="flex space-x-1">
+                        <input id="srcSearch" type="text" placeholder="Source location..." class="flex-1 bg-white border border-slate-300 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-blue-500">
+                        <button onclick="geocodeAddress('src')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 rounded font-medium">Find</button>
+                    </div>
+                    <div class="flex space-x-1">
+                        <input id="destSearch" type="text" placeholder="Destination location..." class="flex-1 bg-white border border-slate-300 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-blue-500">
+                        <button onclick="geocodeAddress('dest')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 rounded font-medium">Find</button>
+                    </div>
+                </div>
+
+                <!-- Simulation Barriers Tool -->
+                <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg space-y-1.5">
+                    <label class="block text-xs font-bold text-amber-900 uppercase tracking-wide">⚡ Simulation Injector (Dynamic Barriers)</label>
+                    <input id="customBlockInput" type="text" placeholder="Type street name to submerge..." class="w-full bg-white border border-amber-300 text-xs rounded-md px-2.5 py-1.5 focus:outline-none focus:border-amber-600 font-mono">
+                </div>
+
+                <div class="space-y-2">
+                    <button onclick="activateLiveTracking()" class="w-full bg-emerald-600 hover:bg-emerald-50 text-white text-xs font-semibold py-2 px-4 rounded-md">
+                        📍 Lock On Live Device GPS Coordinates
+                    </button>
+                    <button onclick="computeSafeRoute()" class="w-full bg-blue-600 hover:bg-blue-50 text-white text-sm font-semibold py-2.5 px-4 rounded-md shadow-md">
+                        Calculate Flood-Aware Route
+                    </button>
+                    <button onclick="clearMapLayers()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs py-1.5 rounded-md">
+                        Clear All Inputs
+                    </button>
+                </div>
+
+                <div id="explanationPanel" class="p-4 rounded-lg hidden text-xs leading-relaxed">
+                    <h3 class="font-bold uppercase tracking-wide mb-1">Route Evaluation Profile</h3>
+                    <p id="explanationText" class="font-medium">Standby...</p>
+                </div>
+            </div>
+
+            
+                <!-- Multi-Modal Distance & Time Cards Matrix -->
+                <div id="travelTimeCard" class="bg-slate-900 text-white p-4 rounded-xl shadow-md space-y-3 hidden mt-4">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Estimated Travel Times</h4>
+                        <span id="routeDistance" class="bg-blue-600 text-white font-mono font-bold text-xs px-2.5 py-0.5 rounded-full">0.0 km</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div class="bg-slate-800 p-2 rounded flex justify-between items-center">
+                            <span class="text-slate-400">🚶 Walking</span>
+                            <span id="timeWalking" class="font-mono font-bold">-- mins</span>
+                        </div>
+                        <div class="bg-slate-800 p-2 rounded flex justify-between items-center">
+                            <span class="text-slate-400">🚲 Bike</span>
+                            <span id="timeBike" class="font-mono font-bold">-- mins</span>
+                        </div>
+                        <div class="bg-slate-800 p-2 rounded flex justify-between items-center">
+                            <span class="text-slate-400">🚗 Car</span>
+                            <span id="timeCar" class="font-mono font-bold">-- mins</span>
+                        </div>
+                        <div class="bg-slate-800 p-2 rounded flex justify-between items-center">
+                            <span class="text-slate-400">🚌 Bus</span>
+                            <span id="timeBus" class="font-mono font-bold">-- mins</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weather/Atmospheric Radar Card -->
+                <div id="weatherCard" class="bg-indigo-900 text-white p-4 rounded-xl shadow-md space-y-2 hidden mt-4">
+                    <div class="flex items-center justify-between border-b border-indigo-800 pb-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-300">🌩️ Atmospheric Radar</h4>
+                    </div>
+                    <div class="flex justify-between items-end pt-1">
+                        <span id="weatherDesc" class="text-sm font-medium text-indigo-100 capitalize">--</span>
+                        <div class="text-right">
+                            <span id="weatherTemp" class="block text-2xl font-bold font-mono">--°C</span>
+                            <span id="weatherWind" class="block text-xs text-indigo-300">-- km/h</span>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Telemetry Metrics Output -->
+            <div id="metricsPanel" class="mt-4 border-t border-slate-200 pt-3 space-y-2 hidden">
+                <div class="grid grid-cols-3 gap-2 font-mono text-xs">
+                    <div class="bg-slate-50 p-2 border border-slate-200 rounded">
+                        <span class="block text-[9px] text-slate-400 uppercase">Risk Tier</span>
+                        <span id="metricTier" class="font-bold">--</span>
+                    </div>
+                    <div class="bg-slate-50 p-2 border border-slate-200 rounded">
+                        <span class="block text-[9px] text-slate-400 uppercase">Score Matrix</span>
+                        <span id="metricScore" class="font-bold">--</span>
+                    </div>
+                    <div class="bg-slate-50 p-2 border border-slate-200 rounded">
+                        <span class="block text-[9px] text-slate-400 uppercase">Latency</span>
+                        <span id="metricLatency" class="font-bold text-blue-600">--</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Layer Workspace Area -->
+        <section class="flex-1 relative bg-slate-100">
+            <div id="map" class="absolute inset-0"></div>
+        </section>
+    </main>
+
+    <script>
+        const cityFocus = { "Mangaluru": [12.8701, 74.8800], "Patna": [25.5941, 85.1376] };
+        let map = L.map('map', { zoomControl: false }).setView(cityFocus["Mangaluru"], 14);
+        
+        // Base street layer tile template
+        let baseStreetLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 20 }).addTo(map);
+
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        let startMarker = null, endMarker = null;
+        
+        // Declare and allocate dedicated Layer Groups for map extensions controls toggle integration
+        let routeLayerGroup = L.layerGroup().addTo(map);
+        let submergedLayerGroup = L.layerGroup().addTo(map);
+        let warningLayerGroup = L.layerGroup().addTo(map);
+
+        // Map extension layer matrix definitions
+        let overlayExtensionMaps = {
+            "🚀 Evacuation Path": routeLayerGroup,
+            "🔴 Submerged Zones Layer": submergedLayerGroup,
+            "🟡 Vulnerable Networks Layer": warningLayerGroup
+        };
+
+        // Renders standard open-source overlay checkbox widgets on top right canvas zone
+        L.control.layers(null, overlayExtensionMaps, { position: 'topright', collapsed: false }).addTo(map);
+
+        let liveTrackingActive = false, watchId = null;
+
+        function panMapToCity() {
+            map.flyTo(cityFocus[document.getElementById("citySelect").value], 14);
+            clearMapLayers();
+        }
+
+        function clearMapLayers() {
+            if(startMarker) map.removeLayer(startMarker);
+            if(endMarker) map.removeLayer(endMarker);
+            routeLayerGroup.clearLayers();
+            submergedLayerGroup.clearLayers();
+            warningLayerGroup.clearLayers();
+            startMarker = null; endMarker = null;
+            document.getElementById("metricsPanel").classList.add("hidden");
+            document.getElementById("explanationPanel").classList.add("hidden");
+            document.getElementById("customBlockInput").value = "";
+            if (watchId) { navigator.geolocation.clearWatch(watchId); }
+            liveTrackingActive = false;
+        }
+
+        function geocodeAddress(type) {
+            const currentCity = document.getElementById("citySelect").value;
+            const queryRaw = document.getElementById(type === 'src' ? 'srcSearch' : 'destSearch').value;
+            if(!queryRaw) return;
+            
+            fetch(\`https://nominatim.openstreetmap.org/search?format=json&q=\${encodeURIComponent(queryRaw + ", " + currentCity)}\`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.length === 0) { alert("Address string target missed."); return; }
+                    const latlng = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+                    if(type === 'src') {
+                        if(startMarker) map.removeLayer(startMarker);
+                        startMarker = L.marker(latlng).addTo(map);
+                    } else {
+                        if(endMarker) map.removeLayer(endMarker);
+                        endMarker = L.marker(latlng).addTo(map);
+                    }
+                    map.panTo(latlng);
+                });
+        }
+
+        function activateLiveTracking() {
+            if (!navigator.geolocation) { alert("Hardware Geolocation missing."); return; }
+            liveTrackingActive = true;
+            watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const liveLatLng = [lat, lon];
+                    if (startMarker) { startMarker.setLatLng(liveLatLng); } 
+                    else { startMarker = L.marker(liveLatLng).addTo(map); }
+                    if (endMarker) { computeSafeRoute(); }
+                },
+                (err) => { console.error(err); },
+                { enableHighAccuracy: true }
+            );
+        }
+
+        map.on('click', function(e) {
+            if (liveTrackingActive) {
+                if (!endMarker) { endMarker = L.marker(e.latlng).addTo(map); computeSafeRoute(); }
+                return;
+            }
+            if (!startMarker) { startMarker = L.marker(e.latlng).addTo(map); } 
+            else if (!endMarker) { endMarker = L.marker(e.latlng).addTo(map); computeSafeRoute(); }
+        });
+
+        function computeSafeRoute() {
+            if (!startMarker || !endMarker) return;
+
+            // Clear previous overlays immediately to prevent stale visual routes
+            routeLayerGroup.clearLayers();
+            submergedLayerGroup.clearLayers();
+            warningLayerGroup.clearLayers();
+
+            const payload = {
+                city: document.getElementById("citySelect").value,
+                start: [startMarker.getLatLng().lat, startMarker.getLatLng().lng],
+                end: [endMarker.getLatLng().lat, endMarker.getLatLng().lng],
+                custom_block: document.getElementById("customBlockInput").value
+            };
+
+            fetch('http://localhost:5000/api/route', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    
+                    document.getElementById("weatherCard").classList.remove("hidden");
+                    document.getElementById("weatherDesc").innerText = data.weather.description;
+                    document.getElementById("weatherTemp").innerText = Math.round(data.weather.temperature) + "°C";
+                    document.getElementById("weatherWind").innerText = data.weather.windspeed + " km/h";
+
+                    document.getElementById("travelTimeCard").classList.remove("hidden");
+                    document.getElementById("routeDistance").innerText = data.distance_km + " km";
+                    document.getElementById("timeWalking").innerText = data.travel_times.walking + " mins";
+                    document.getElementById("timeBike").innerText = data.travel_times.bike + " mins";
+                    document.getElementById("timeCar").innerText = data.travel_times.car + " mins";
+                    document.getElementById("timeBus").innerText = data.travel_times.bus + " mins";
+
+                    document.getElementById("metricsPanel").classList.remove("hidden");
+                    document.getElementById("metricTier").innerText = data.risk_tier;
+                    document.getElementById("metricScore").innerText = data.risk_score;
+                    document.getElementById("metricLatency").innerText = data.latency_ms + " ms";
+
+                    const explanationBox = document.getElementById("explanationPanel");
+                    const explanationTxt = document.getElementById("explanationText");
+                    explanationBox.classList.remove("hidden");
+
+                    if (data.risk_score >= 50) {
+                        explanationBox.className = "p-4 bg-rose-50 border border-rose-200 rounded-lg text-rose-900";
+                    } else {
+                        explanationBox.className = "p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900";
+                    }
+                    explanationTxt.innerText = data.reasoning;
+
+                    // 1. Plot the Submerged/Blocked Road Layer (Red Lines)
+                    data.submerged_layers.forEach(geom => {
+                        L.polyline(geom, { color: '#ef4444', weight: 4, opacity: 0.7, dashArray: '5, 8' }).addTo(submergedLayerGroup);
+                    });
+
+                    // 2. Plot the Waterlogged Warning Road Layer (Amber Lines)
+                    data.warning_layers.forEach(geom => {
+                        L.polyline(geom, { color: '#f59e0b', weight: 4, opacity: 0.6 }).addTo(warningLayerGroup);
+                    });
+
+                    // 3. Plot the final dynamic Snapped Route Vector Corridor Layer (Solid High-Contrast Blue Line)
+                    let mainRoute = L.polyline(data.route, { color: '#2563eb', weight: 6, opacity: 0.95 }).addTo(routeLayerGroup);
+                    
+                    map.fitBounds(mainRoute.getBounds(), { padding: [40, 40] });
+                } else {
+                    document.getElementById("metricsPanel").classList.add("hidden");
+                    document.getElementById("explanationPanel").classList.add("hidden");
+                    alert("Routing Error: " + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Routing calculation failed due to network or server error.");
+            });
+        }
+    </script>
+</body>
+</html>
+</html>`;
 
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
+    <View style={styles.container}>
 
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
-                />
-              </ThemedView>
-            </Pressable>
-          </ExternalLink>
-        </ThemedView>
-
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
-
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
-      </ThemedView>
-    </ScrollView>
+      
+      {Platform.OS === 'web' ? (
+        <iframe
+          srcDoc={mapHtml}
+          style={{ width: '100%', height: '100%', border: 'none' }}
+          sandbox="allow-scripts allow-same-origin"
+        />
+      ) : (
+        <View style={styles.nativeFallback}>
+          <Text style={{ color: 'white' }}>Map view is only available on web.</Text>
+        </View>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
   container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
+    flex: 1,
+    backgroundColor: '#020205',
   },
-  titleContainer: {
-    gap: Spacing.three,
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
+  header: {
+    padding: 20,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    pointerEvents: 'none',
   },
-  centerText: {
-    textAlign: 'center',
+  headerTitle: {
+    color: '#ffffff',
+    fontSize: 28,
+    fontWeight: '900',
+    letterSpacing: -0.5,
   },
-  pressed: {
-    opacity: 0.7,
+  headerSubtitle: {
+    color: '#aaccff',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  linkButton: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
+  nativeFallback: {
+    flex: 1,
     justifyContent: 'center',
-    gap: Spacing.one,
     alignItems: 'center',
-  },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  collapsibleContent: {
-    alignItems: 'center',
-  },
-  imageTutorial: {
-    width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
-  },
+  }
 });
