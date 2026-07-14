@@ -191,13 +191,27 @@ class UltraLowLatencyRouter:
         G = self.graphs[city_key]
         orig_node = ox.nearest_nodes(G, X=start_coords[1], Y=start_coords[0])
         dest_node = ox.nearest_nodes(G, X=end_coords[1], Y=end_coords[0])
+        # Background computation: find standard route (no weather drag) to calculate how many flooded roads we bypass
+        avoided_submerged = 0
+        avoided_warn = 0
+        try:
+            std_path = nx.shortest_path(G, source=orig_node, target=dest_node, weight='base_length')
+            for u, v in zip(std_path[:-1], std_path[1:]):
+                edge_data = G.get_edge_data(u, v)
+                data = list(edge_data.values())[0] if edge_data else {}
+                if data.get('is_blocked', False): avoided_submerged += 1
+                elif data.get('current_weight', 1.0) > data.get('base_length', 1.0): avoided_warn += 1
+        except Exception:
+            pass
+
         path = self.a_star_search(city_key, orig_node, dest_node)
         
-        if not path: return None, 0, {}
+        if not path: return None, 0, {}, "", 0, 0
             
         detailed_coords = []
         total_dist = 0.0
         times = {mode: 0.0 for mode in SPEED_PROFILES}
+        has_warning = False
 
         for u, v in zip(path[:-1], path[1:]):
             edge_data = G.get_edge_data(u, v)
@@ -213,6 +227,7 @@ class UltraLowLatencyRouter:
             length = data.get('base_length', 1.0)
             total_dist += length
             road_risk = data.get('risk_score', 0.0)
+            if road_risk >= 34.0: has_warning = True
             
             p_mult = 1.0 + (road_risk / 15.0) if road_risk >= 34.0 else 1.0
             for mode, speed in SPEED_PROFILES.items():
@@ -224,7 +239,33 @@ class UltraLowLatencyRouter:
                 detailed_coords.append([G.nodes[u]['y'], G.nodes[u]['x']])
                 
         detailed_coords.append([G.nodes[path[-1]]['y'], G.nodes[path[-1]]['x']])
-        return detailed_coords, round(total_dist / 1000.0, 2), {m: round(t) for m, t in times.items()}
+        
+        if avoided_submerged == 0 and avoided_warn == 0:
+            pass_used = "standard"
+        elif has_warning:
+            pass_used = "yellow"
+        else:
+            pass_used = "green"
+            
+        return detailed_coords, round(total_dist / 1000.0, 2), {m: round(t) for m, t in times.items()}, pass_used, avoided_submerged, avoided_warn
+
+    def generate_reasoning(self, risk_tier, pass_used, avoided_submerged, avoided_warn):
+        """Generates natural, concise reasoning based on live routing data."""
+        if avoided_submerged == 0 and avoided_warn == 0:
+            return "Standard optimal route selected. No flooded roads were in your way."
+
+        reasoning = f"Area risk level is {risk_tier}. "
+        
+        if avoided_submerged > 0 or avoided_warn > 0:
+            total_avoided = avoided_submerged + avoided_warn
+            reasoning += f"Successfully avoided {total_avoided} flooded or vulnerable road segments that were on the standard path. "
+            
+        if pass_used == "green":
+            reasoning += "Found a completely safe detour avoiding all risk zones."
+        elif pass_used == "yellow":
+            reasoning += "No completely safe detour exists. Routed through some low-risk zones to bypass the severe flooding. Please proceed carefully."
+            
+        return reasoning
 
 router_engine = UltraLowLatencyRouter()
 
@@ -240,12 +281,12 @@ def calculate_route():
     
     # Accelerated processing using pre-warmed cache arrays
     score, tier, submerged, warnings, weather = router_engine.adapt_network_weights_vectorized(city_key, data['start'][0], data['start'][1], data.get("custom_block", ""))
-    route_coords, dist_km, times = router_engine.generate_safe_detailed_route(city_key, data['start'], data['end'])
+    route_coords, dist_km, times, pass_used, avoided_submerged, avoided_warn = router_engine.generate_safe_detailed_route(city_key, data['start'], data['end'])
     
     if route_coords is None:
         return jsonify({"status": "failed", "message": "All paths submerged."}), 400
         
-    reasoning = "⚡ High Risk Matrix Engaged: The custom A* search engine detected heavy risk values surrounding localized coastal basins. Travel times are dynamically penalised reflecting water drag obstacles." if score >= 38 else "✓ Dynamic A* Tracking Verified: Straight line distance cost calculations coordinate seamlessly with active weather patterns."
+    reasoning = router_engine.generate_reasoning(tier, pass_used, avoided_submerged, avoided_warn)
         
     return jsonify({
         "status": "success", "risk_score": round(score, 2), "risk_tier": tier, 
