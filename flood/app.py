@@ -169,8 +169,15 @@ class UltraLowLatencyRouter:
                 
             for neighbor in G.neighbors(current):
                 edge_data = G.get_edge_data(current, neighbor)
-                data = edge_data[0] if 0 in edge_data else list(edge_data.values())[0]
-                weight = data.get('current_weight', float('inf'))
+                
+                # Check all parallel edges and pick the one with the minimum weight
+                best_weight = float('inf')
+                for k, v in edge_data.items():
+                    w = v.get('current_weight', float('inf'))
+                    if w < best_weight:
+                        best_weight = w
+                
+                weight = best_weight
                 if weight == float('inf'): continue
                     
                 tentative_g = current_g + weight
