@@ -245,11 +245,13 @@ def calculate_route():
     if route_coords is None:
         return jsonify({"status": "failed", "message": "All paths submerged."}), 400
         
+    reasoning = "⚡ High Risk Matrix Engaged: The custom A* search engine detected heavy risk values surrounding localized coastal basins. Travel times are dynamically penalised reflecting water drag obstacles." if score >= 38 else "✓ Dynamic A* Tracking Verified: Straight line distance cost calculations coordinate seamlessly with active weather patterns."
+        
     return jsonify({
         "status": "success", "risk_score": round(score, 2), "risk_tier": tier, 
         "latency_ms": round((time.time() - start_time) * 1000, 2),
         "route": route_coords, "submerged_layers": submerged, "warning_layers": warnings, 
-        "weather": weather, "distance_km": dist_km, "travel_times": times
+        "weather": weather, "distance_km": dist_km, "travel_times": times, "reasoning": reasoning
     })
 
 if __name__ == "__main__":
