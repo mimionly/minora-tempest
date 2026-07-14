@@ -201,7 +201,15 @@ class UltraLowLatencyRouter:
 
         for u, v in zip(path[:-1], path[1:]):
             edge_data = G.get_edge_data(u, v)
-            data = edge_data[0] if 0 in edge_data else list(edge_data.values())[0]
+            
+            # Select the parallel edge that the A* search actually picked (the one with minimum weight)
+            best_weight = float('inf')
+            data = list(edge_data.values())[0] if edge_data else {}
+            for k, v_data in edge_data.items():
+                w = v_data.get('current_weight', float('inf'))
+                if w < best_weight:
+                    best_weight = w
+                    data = v_data
             length = data.get('base_length', 1.0)
             total_dist += length
             road_risk = data.get('risk_score', 0.0)
